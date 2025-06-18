@@ -13,7 +13,9 @@ import {
   AlertTriangle, 
   Brain,
   Clock,
-  Activity
+  Activity,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import DoctorLayout from '../components/DoctorLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,6 +42,7 @@ const ChatInterface = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Mock patient data
@@ -128,99 +131,97 @@ const ChatInterface = () => {
     setMessage(suggestion);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   return (
     <DoctorLayout>
       <div className="h-[calc(100vh-8rem)] flex gap-6">
-        {/* Patient Info Sidebar */}
-        <div className="w-80 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-blue-600" />
-                Patient Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="font-medium">{patientInfo.name}</p>
-                <p className="text-sm text-gray-600">Age: {patientInfo.age}, {patientInfo.gender}</p>
-              </div>
-              <Separator />
-              <div>
-                <p className="text-sm font-medium">Reported Symptoms:</p>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {patientInfo.symptoms.map((symptom, i) => (
-                    <Badge key={i} variant="outline" className="text-xs">
-                      {symptom}
+        {/* Collapsible Patient Info Sidebar */}
+        <div className={`transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-12' : 'w-80'} space-y-4 relative`}>
+          {/* Collapse/Expand Button */}
+          <Button
+            onClick={toggleSidebar}
+            variant="outline"
+            size="sm"
+            className="absolute -right-3 top-4 z-10 h-6 w-6 p-0 bg-white border shadow-md hover:shadow-lg"
+          >
+            {isSidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+          </Button>
+
+          {!isSidebarCollapsed && (
+            <>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-blue-600" />
+                    Patient Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <p className="font-medium">{patientInfo.name}</p>
+                    <p className="text-sm text-gray-600">Age: {patientInfo.age}, {patientInfo.gender}</p>
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-sm font-medium">Reported Symptoms:</p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {patientInfo.symptoms.map((symptom, i) => (
+                        <Badge key={i} variant="outline" className="text-xs">
+                          {symptom}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge variant={patientInfo.status === 'active' ? 'default' : 'outline'}>
+                      {patientInfo.status}
                     </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* AI Suggestions */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
+                    <Brain className="h-4 w-4 text-blue-600" />
+                    AI Suggestions
+                  </CardTitle>
+                  <CardDescription className="text-xs text-blue-700">
+                    Click on a suggestion to use it
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {aiSuggestions.map((suggestion, i) => (
+                    <div 
+                      key={i} 
+                      className="text-xs p-2 bg-white rounded border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
+                      onClick={() => applySuggestion(suggestion)}
+                    >
+                      {suggestion}
+                    </div>
                   ))}
-                </div>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Status:</span>
-                <Badge variant={patientInfo.status === 'active' ? 'default' : 'outline'}>
-                  {patientInfo.status}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* AI Suggestions */}
-          <Card className="bg-blue-50 border-blue-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
-                <Brain className="h-4 w-4 text-blue-600" />
-                AI Suggestions
-              </CardTitle>
-              <CardDescription className="text-xs text-blue-700">
-                Click on a suggestion to use it
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {aiSuggestions.map((suggestion, i) => (
-                <div 
-                  key={i} 
-                  className="text-xs p-2 bg-white rounded border border-blue-200 cursor-pointer hover:bg-blue-100 transition-colors"
-                  onClick={() => applySuggestion(suggestion)}
-                >
-                  {suggestion}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Medical Disclaimer */}
-          <Card className="bg-yellow-50 border-yellow-200">
-            <CardContent className="p-4 text-xs text-yellow-800">
-              <div className="flex items-start space-x-2">
-                <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
-                <p>
-                  AI suggestions are for assistance only. Use your professional judgment for all medical decisions.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Session Info */}
-          <Card className="bg-gray-50 border-gray-200">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center justify-between text-xs text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>Session duration:</span>
-                </div>
-                <span>32 minutes</span>
-              </div>
-              <div className="flex items-center justify-between text-xs text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Activity className="h-3 w-3" />
-                  <span>AI assists:</span>
-                </div>
-                <span>5</span>
-              </div>
-            </CardContent>
-          </Card>
+              {/* Medical Disclaimer */}
+              <Card className="bg-yellow-50 border-yellow-200">
+                <CardContent className="p-4 text-xs text-yellow-800">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
+                    <p>
+                      AI suggestions are for assistance only. Use your professional judgment for all medical decisions.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Chat Area */}
