@@ -41,6 +41,34 @@ const Index = () => {
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
             Connect with patients through secure chat while leveraging AI assistance for preliminary insights and medical terminology support.
           </p>
+
+          {/* Demo Credentials Section */}
+          <div className="bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
+            <h3 className="text-lg font-semibold text-blue-900 mb-4">🚀 Try the Demo</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="bg-white rounded-lg p-4 border border-blue-200">
+                <h4 className="font-medium text-blue-800 mb-2">Doctor Demo</h4>
+                <p className="text-xs text-gray-600 mb-2">Email: doctor@demo.com</p>
+                <p className="text-xs text-gray-600 mb-3">Password: password123</p>
+                <Link to="/login">
+                  <Button size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
+                    Doctor Login
+                  </Button>
+                </Link>
+              </div>
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h4 className="font-medium text-gray-800 mb-2">Admin Demo</h4>
+                <p className="text-xs text-gray-600 mb-2">Email: admin@demo.com</p>
+                <p className="text-xs text-gray-600 mb-3">Password: admin123</p>
+                <Link to="/admin-login">
+                  <Button size="sm" variant="outline" className="w-full border-gray-600 text-gray-600 hover:bg-gray-50">
+                    Admin Login
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+
           <div className="flex justify-center space-x-4">
             <Link to="/doctor-signup">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700">

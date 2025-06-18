@@ -49,19 +49,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Mock authentication - replace with real API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
+      // Demo credentials validation
+      const validCredentials = {
+        doctor: { email: 'doctor@demo.com', password: 'password123' },
+        admin: { email: 'admin@demo.com', password: 'admin123' }
+      };
+
+      if (email !== validCredentials[userType].email || password !== validCredentials[userType].password) {
+        throw new Error('Invalid credentials');
+      }
+      
       // Mock user data
       const mockUser: User = {
         id: `${userType}-${Date.now()}`,
         email,
         userType,
         name: userType === 'admin' ? 'System Admin' : 'Dr. John Smith',
-        isApproved: userType === 'admin' ? true : true
+        isApproved: true
       };
       
       setUser(mockUser);
       localStorage.setItem('user', JSON.stringify(mockUser));
     } catch (err) {
-      setError('Login failed. Please try again.');
+      setError('Invalid credentials. Please check your email and password.');
+      throw err;
     } finally {
       setIsLoading(false);
     }

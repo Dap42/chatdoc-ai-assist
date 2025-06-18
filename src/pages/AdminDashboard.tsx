@@ -1,303 +1,270 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Users, 
   FileText, 
-  Search, 
-  Shield, 
-  LogOut, 
-  Check, 
-  X, 
-  MoreVertical, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
   Upload,
+  Shield,
+  Stethoscope,
   Eye,
-  Trash,
-  AlertTriangle,
+  Download
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface Doctor {
   id: string;
   name: string;
   email: string;
   specialty: string;
-  status: 'pending' | 'approved' | 'rejected';
   registrationDate: Date;
+  status: 'pending' | 'approved' | 'rejected';
+}
+
+interface Document {
+  id: string;
+  name: string;
+  uploadDate: Date;
+  size: string;
+  type: string;
 }
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPdf, setSelectedPdf] = useState<File | null>(null);
-  const [pdfName, setPdfName] = useState('');
-  const [pdfDescription, setPdfDescription] = useState('');
-  const [selectedDoctors, setSelectedDoctors] = useState<string[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  // Mock doctors data
-  const [doctors, setDoctors] = useState<Doctor[]>([
-    {
-      id: '1',
-      name: 'Dr. John Smith',
-      email: 'john.smith@example.com',
-      specialty: 'Cardiology',
-      status: 'approved',
-      registrationDate: new Date(2023, 3, 15)
-    },
-    {
-      id: '2',
-      name: 'Dr. Sarah Johnson',
-      email: 'sarah.johnson@example.com',
-      specialty: 'Pediatrics',
-      status: 'pending',
-      registrationDate: new Date(2023, 5, 22)
-    },
-    {
-      id: '3',
-      name: 'Dr. Michael Chen',
-      email: 'michael.chen@example.com',
-      specialty: 'Neurology',
-      status: 'pending',
-      registrationDate: new Date(2023, 6, 10)
-    },
-    {
-      id: '4',
-      name: 'Dr. Emily Taylor',
-      email: 'emily.taylor@example.com',
-      specialty: 'Dermatology',
-      status: 'rejected',
-      registrationDate: new Date(2023, 5, 5)
-    },
-    {
-      id: '5',
-      name: 'Dr. James Wilson',
-      email: 'james.wilson@example.com',
-      specialty: 'Orthopedics',
-      status: 'approved',
-      registrationDate: new Date(2023, 4, 28)
-    }
-  ]);
+  useEffect(() => {
+    // Mock data for doctors
+    const mockDoctors: Doctor[] = [
+      {
+        id: '1',
+        name: 'Dr. John Smith',
+        email: 'john.smith@hospital.com',
+        specialty: 'Cardiology',
+        registrationDate: new Date(2024, 0, 15),
+        status: 'pending'
+      },
+      {
+        id: '2',
+        name: 'Dr. Sarah Johnson',
+        email: 'sarah.johnson@clinic.com',
+        specialty: 'Pediatrics',
+        registrationDate: new Date(2024, 0, 20),
+        status: 'approved'
+      },
+      {
+        id: '3',
+        name: 'Dr. Michael Brown',
+        email: 'michael.brown@medical.com',
+        specialty: 'Neurology',
+        registrationDate: new Date(2024, 1, 5),
+        status: 'pending'
+      }
+    ];
 
-  // Mock PDFs data
-  const [pdfs, setPdfs] = useState([
-    { id: '1', name: 'Clinical Guidelines 2023', description: 'Updated clinical protocols for common conditions', uploadDate: new Date(2023, 0, 15) },
-    { id: '2', name: 'Patient Intake Form', description: 'Standard form for new patient registration', uploadDate: new Date(2023, 2, 10) },
-    { id: '3', name: 'Medical Ethics Handbook', description: 'Guidelines on medical ethics and patient confidentiality', uploadDate: new Date(2023, 3, 22) },
-  ]);
+    const mockDocuments: Document[] = [
+      {
+        id: '1',
+        name: 'Medical Guidelines 2024',
+        uploadDate: new Date(2024, 0, 10),
+        size: '2.5 MB',
+        type: 'PDF'
+      },
+      {
+        id: '2',
+        name: 'Treatment Protocols',
+        uploadDate: new Date(2024, 0, 12),
+        size: '1.8 MB',
+        type: 'PDF'
+      }
+    ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+    setDoctors(mockDoctors);
+    setDocuments(mockDocuments);
+  }, []);
+
+  const handleDoctorAction = (doctorId: string, action: 'approve' | 'reject') => {
+    setDoctors(prev => prev.map(doctor => 
+      doctor.id === doctorId 
+        ? { ...doctor, status: action === 'approve' ? 'approved' : 'rejected' }
+        : doctor
+    ));
+
+    const actionText = action === 'approve' ? 'approved' : 'rejected';
+    toast({
+      title: `Doctor ${actionText}`,
+      description: `Doctor account has been ${actionText} successfully.`,
+    });
   };
 
-  const filteredDoctors = doctors.filter(doctor => 
-    doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    doctor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialty.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedPdf(e.target.files[0]);
-      setPdfName(e.target.files[0].name.split('.')[0]);
-    }
-  };
-
-  const handlePdfUpload = () => {
-    if (!selectedPdf || !pdfName.trim()) {
+  const handleFileUpload = () => {
+    if (!selectedFile) {
       toast({
-        title: "Missing Information",
-        description: "Please provide a file and name for the PDF.",
+        title: "No file selected",
+        description: "Please select a file to upload.",
         variant: "destructive",
       });
       return;
     }
 
-    // Mock upload - replace with real API call
-    const newPdf = {
+    // Mock file upload
+    const newDocument: Document = {
       id: Date.now().toString(),
-      name: pdfName,
-      description: pdfDescription,
-      uploadDate: new Date()
+      name: selectedFile.name,
+      uploadDate: new Date(),
+      size: `${(selectedFile.size / 1024 / 1024).toFixed(1)} MB`,
+      type: 'PDF'
     };
 
-    setPdfs([...pdfs, newPdf]);
-    setSelectedPdf(null);
-    setPdfName('');
-    setPdfDescription('');
-    
+    setDocuments(prev => [...prev, newDocument]);
+    setSelectedFile(null);
+
     toast({
-      title: "PDF Uploaded",
-      description: "The document has been uploaded successfully.",
+      title: "File uploaded",
+      description: `${selectedFile.name} has been uploaded successfully.`,
     });
   };
 
-  const handleSelectDoctor = (doctorId: string) => {
-    if (selectedDoctors.includes(doctorId)) {
-      setSelectedDoctors(selectedDoctors.filter(id => id !== doctorId));
-    } else {
-      setSelectedDoctors([...selectedDoctors, doctorId]);
-    }
-  };
+  const getStatusBadge = (status: Doctor['status']) => {
+    const variants = {
+      pending: 'default' as const,
+      approved: 'default' as const,
+      rejected: 'destructive' as const
+    };
 
-  const handleSelectAllDoctors = (checked: boolean) => {
-    if (checked) {
-      setSelectedDoctors(filteredDoctors.map(doctor => doctor.id));
-    } else {
-      setSelectedDoctors([]);
-    }
-  };
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      approved: 'bg-green-100 text-green-800',
+      rejected: 'bg-red-100 text-red-800'
+    };
 
-  const updateDoctorStatus = (doctorId: string, status: 'pending' | 'approved' | 'rejected') => {
-    const updatedDoctors = doctors.map(doctor => 
-      doctor.id === doctorId ? { ...doctor, status } : doctor
+    return (
+      <Badge variant={variants[status]} className={colors[status]}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
     );
-    setDoctors(updatedDoctors);
-    
-    toast({
-      title: "Status Updated",
-      description: `Doctor status has been updated to ${status}.`,
-    });
   };
 
-  const handleDeletePdf = (pdfId: string) => {
-    setPdfs(pdfs.filter(pdf => pdf.id !== pdfId));
-    
-    toast({
-      title: "PDF Deleted",
-      description: "The document has been deleted successfully.",
-    });
+  const stats = {
+    totalDoctors: doctors.length,
+    pendingApprovals: doctors.filter(d => d.status === 'pending').length,
+    approvedDoctors: doctors.filter(d => d.status === 'approved').length,
+    totalDocuments: documents.length
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Admin Header */}
-      <header className="bg-gray-900 text-white shadow-md">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
-              <Shield className="h-8 w-8 text-blue-500" />
+              <Shield className="h-8 w-8 text-blue-600" />
               <div>
-                <h1 className="text-xl font-bold">Admin Dashboard</h1>
-                <p className="text-xs text-gray-400">Doctor AI Chat Platform</p>
+                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+                <p className="text-sm text-gray-500">Doctor AI Chat Platform</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <div className="text-right hidden md:block">
-                <p className="font-medium text-sm">{user?.name}</p>
-                <p className="text-xs text-gray-400">Administrator</p>
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                <p className="text-xs text-gray-500">Administrator</p>
               </div>
-              <Button 
-                variant="ghost" 
-                className="text-gray-300 hover:text-white hover:bg-gray-800"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5" />
-              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="doctors" className="w-full">
-          <TabsList className="mb-8">
-            <TabsTrigger value="doctors" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Users className="h-4 w-4 mr-2" />
-              Doctor Management
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="h-4 w-4 mr-2" />
-              PDF Documents
-            </TabsTrigger>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Total Doctors</p>
+                  <p className="text-3xl font-bold text-gray-900">{stats.totalDoctors}</p>
+                </div>
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Pending Approvals</p>
+                  <p className="text-3xl font-bold text-yellow-600">{stats.pendingApprovals}</p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Approved Doctors</p>
+                  <p className="text-3xl font-bold text-green-600">{stats.approvedDoctors}</p>
+                </div>
+                <CheckCircle className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Documents</p>
+                  <p className="text-3xl font-bold text-purple-600">{stats.totalDocuments}</p>
+                </div>
+                <FileText className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Tabs defaultValue="doctors" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="doctors">Doctor Management</TabsTrigger>
+            <TabsTrigger value="documents">Document Management</TabsTrigger>
           </TabsList>
-          
-          {/* Doctors Tab */}
+
+          {/* Doctor Management Tab */}
           <TabsContent value="doctors">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div>
-                  <CardTitle className="text-xl">Doctors List</CardTitle>
-                  <CardDescription>
-                    Manage registrations and doctor accounts
-                  </CardDescription>
-                </div>
-                <div className="relative w-64">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                  <Input
-                    placeholder="Search doctors..."
-                    className="pl-8"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+              <CardHeader>
+                <CardTitle>Doctor Registrations</CardTitle>
+                <CardDescription>
+                  Manage doctor account approvals and view registration details
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-12">
-                          <Checkbox 
-                            onCheckedChange={(checked) => 
-                              handleSelectAllDoctors(checked as boolean)
-                            } 
-                            checked={selectedDoctors.length === filteredDoctors.length && filteredDoctors.length > 0}
-                          />
-                        </TableHead>
                         <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Specialty</TableHead>
                         <TableHead>Registration Date</TableHead>
                         <TableHead>Status</TableHead>
@@ -305,296 +272,136 @@ const AdminDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredDoctors.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="h-24 text-center text-gray-500">
-                            No doctors found
+                      {doctors.map((doctor) => (
+                        <TableRow key={doctor.id}>
+                          <TableCell className="font-medium">{doctor.name}</TableCell>
+                          <TableCell>{doctor.email}</TableCell>
+                          <TableCell>{doctor.specialty}</TableCell>
+                          <TableCell>{doctor.registrationDate.toLocaleDateString()}</TableCell>
+                          <TableCell>{getStatusBadge(doctor.status)}</TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              {doctor.status === 'pending' && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleDoctorAction(doctor.id, 'approve')}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <CheckCircle className="h-4 w-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleDoctorAction(doctor.id, 'reject')}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              {doctor.status !== 'pending' && (
+                                <Button size="sm" variant="outline">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        filteredDoctors.map((doctor) => (
-                          <TableRow key={doctor.id}>
-                            <TableCell>
-                              <Checkbox 
-                                checked={selectedDoctors.includes(doctor.id)} 
-                                onCheckedChange={() => handleSelectDoctor(doctor.id)}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center space-x-3">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarFallback className="bg-blue-100 text-blue-600">
-                                    {doctor.name.split(' ').map(n => n[0]).join('')}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <p className="font-medium">{doctor.name}</p>
-                                  <p className="text-xs text-gray-500">{doctor.email}</p>
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>{doctor.specialty}</TableCell>
-                            <TableCell>{doctor.registrationDate.toLocaleDateString()}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={
-                                  doctor.status === 'approved' ? 'default' :
-                                  doctor.status === 'pending' ? 'outline' : 'destructive'
-                                }
-                              >
-                                {doctor.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem 
-                                    onClick={() => updateDoctorStatus(doctor.id, 'approved')}
-                                    className="text-green-600"
-                                  >
-                                    <Check className="h-4 w-4 mr-2" />
-                                    Approve
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => updateDoctorStatus(doctor.id, 'rejected')}
-                                    className="text-red-600"
-                                  >
-                                    <X className="h-4 w-4 mr-2" />
-                                    Reject
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View Details
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <p className="text-sm text-gray-600">
-                  {selectedDoctors.length} of {doctors.length} doctors selected
-                </p>
-                <div className="flex gap-2">
-                  {selectedDoctors.length > 0 && (
-                    <>
-                      <Button
-                        variant="outline"
-                        className="border-green-600 text-green-600 hover:bg-green-50"
-                        onClick={() => {
-                          const updatedDoctors = doctors.map(doctor => 
-                            selectedDoctors.includes(doctor.id) ? { ...doctor, status: 'approved' } : doctor
-                          );
-                          setDoctors(updatedDoctors);
-                          toast({
-                            title: "Bulk Action Completed",
-                            description: `${selectedDoctors.length} doctors have been approved.`,
-                          });
-                          setSelectedDoctors([]);
-                        }}
-                      >
-                        <Check className="h-4 w-4 mr-2" />
-                        Approve Selected
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        className="border-red-600 text-red-600 hover:bg-red-50"
-                        onClick={() => {
-                          const updatedDoctors = doctors.map(doctor => 
-                            selectedDoctors.includes(doctor.id) ? { ...doctor, status: 'rejected' } : doctor
-                          );
-                          setDoctors(updatedDoctors);
-                          toast({
-                            title: "Bulk Action Completed",
-                            description: `${selectedDoctors.length} doctors have been rejected.`,
-                          });
-                          setSelectedDoctors([]);
-                        }}
-                      >
-                        <X className="h-4 w-4 mr-2" />
-                        Reject Selected
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardFooter>
             </Card>
           </TabsContent>
-          
-          {/* PDF Documents Tab */}
-          <TabsContent value="documents">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">PDF Documents</CardTitle>
-                <CardDescription>
-                  Upload and manage documents for doctors
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Upload New PDF */}
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload New Document
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Upload PDF Document</DialogTitle>
-                      <DialogDescription>
-                        Upload a PDF document for doctors to access
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="grid w-full max-w-sm items-center gap-1.5">
-                        <Label htmlFor="pdf">PDF File</Label>
-                        <Input 
-                          id="pdf" 
-                          type="file" 
-                          accept=".pdf"
-                          onChange={handleFileChange}
-                        />
-                      </div>
-                      <div className="grid w-full gap-1.5">
-                        <Label htmlFor="pdfName">Document Name</Label>
-                        <Input 
-                          id="pdfName" 
-                          value={pdfName} 
-                          onChange={(e) => setPdfName(e.target.value)} 
-                          placeholder="Enter document name"
-                        />
-                      </div>
-                      <div className="grid w-full gap-1.5">
-                        <Label htmlFor="pdfDescription">Description (Optional)</Label>
-                        <Input 
-                          id="pdfDescription" 
-                          value={pdfDescription} 
-                          onChange={(e) => setPdfDescription(e.target.value)} 
-                          placeholder="Enter description"
-                        />
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" type="button" onClick={() => {
-                        setSelectedPdf(null);
-                        setPdfName('');
-                        setPdfDescription('');
-                      }}>
-                        Cancel
-                      </Button>
-                      <Button type="button" onClick={handlePdfUpload}>
-                        Upload
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
 
-                {/* PDF List */}
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Document Name</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Upload Date</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pdfs.length === 0 ? (
+          {/* Document Management Tab */}
+          <TabsContent value="documents">
+            <div className="space-y-6">
+              {/* Upload Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upload Documents</CardTitle>
+                  <CardDescription>
+                    Upload PDF documents for doctors to access
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="file-upload">Select PDF File</Label>
+                      <Input
+                        id="file-upload"
+                        type="file"
+                        accept=".pdf"
+                        onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <Button onClick={handleFileUpload} className="w-full">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Document
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Documents List */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Uploaded Documents</CardTitle>
+                  <CardDescription>
+                    Manage documents available to doctors
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={4} className="h-24 text-center text-gray-500">
-                            No documents uploaded yet
-                          </TableCell>
+                          <TableHead>Document Name</TableHead>
+                          <TableHead>Upload Date</TableHead>
+                          <TableHead>File Size</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
-                      ) : (
-                        pdfs.map((pdf) => (
-                          <TableRow key={pdf.id}>
+                      </TableHeader>
+                      <TableBody>
+                        {documents.map((doc) => (
+                          <TableRow key={doc.id}>
+                            <TableCell className="font-medium">{doc.name}</TableCell>
+                            <TableCell>{doc.uploadDate.toLocaleDateString()}</TableCell>
+                            <TableCell>{doc.size}</TableCell>
                             <TableCell>
-                              <div className="flex items-center space-x-3">
-                                <FileText className="h-5 w-5 text-blue-600" />
-                                <span className="font-medium">{pdf.name}</span>
-                              </div>
+                              <Badge variant="outline">{doc.type}</Badge>
                             </TableCell>
-                            <TableCell className="max-w-md truncate">{pdf.description}</TableCell>
-                            <TableCell>{pdf.uploadDate.toLocaleDateString()}</TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
                                 <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4 mr-2" />
+                                  <Eye className="h-4 w-4 mr-1" />
                                   View
                                 </Button>
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      className="border-red-300 text-red-600 hover:bg-red-50"
-                                    >
-                                      <Trash className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Delete Document</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Are you sure you want to delete "{pdf.name}"? This action cannot be undone.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction 
-                                        className="bg-red-600 hover:bg-red-700"
-                                        onClick={() => handleDeletePdf(pdf.id)}
-                                      >
-                                        Delete
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
+                                <Button size="sm" variant="outline">
+                                  <Download className="h-4 w-4 mr-1" />
+                                  Download
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Document Disclaimer */}
-            <Card className="mt-6 bg-yellow-50 border-yellow-200">
-              <CardContent className="pt-6">
-                <div className="flex items-start space-x-3">
-                  <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                  <div>
-                    <h3 className="font-medium text-yellow-800">Document Guidelines</h3>
-                    <p className="text-sm text-yellow-700 mt-1">
-                      Ensure all uploaded documents comply with medical privacy regulations and do not contain any 
-                      patient-identifiable information. Documents will be accessible by all approved doctors on the platform.
-                    </p>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
     </div>
   );
 };

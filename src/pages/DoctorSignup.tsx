@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -85,6 +84,20 @@ const DoctorSignup = () => {
             <span className="text-2xl font-bold">Doctor AI Chat</span>
           </Link>
         </div>
+
+        {/* Demo Credentials Alert */}
+        <Card className="mb-6 bg-blue-50 border-blue-200">
+          <CardContent className="pt-4">
+            <p className="text-sm text-blue-800 font-medium mb-2">🚀 Quick Demo Access</p>
+            <p className="text-sm text-blue-700 mb-3">
+              Want to try the platform immediately? Use these demo credentials on the login page:
+            </p>
+            <div className="bg-white p-3 rounded border border-blue-200">
+              <p className="text-xs font-mono text-blue-900">Email: doctor@demo.com</p>
+              <p className="text-xs font-mono text-blue-900">Password: password123</p>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="border-blue-100 shadow-lg">
           <CardHeader className="text-center">
