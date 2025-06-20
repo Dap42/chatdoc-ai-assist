@@ -35,7 +35,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
   }
 
   return (
-    <div className="space-y-6 w-full max-w-3xl mx-auto">
+    <div className="space-y-4 w-full max-w-4xl mx-auto">
       {messages.map((msg) => (
         <div
           key={msg.id}
@@ -44,16 +44,16 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
           }`}
         >
           <div
-            className={`flex items-start gap-3 max-w-[80%] ${
+            className={`flex items-start gap-3 max-w-[75%] ${
               msg.sender === "doctor" ? "flex-row-reverse" : ""
             }`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+              className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1
                 ${
                   msg.sender === "doctor"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-600"
+                    : "bg-gray-100 text-gray-600"
                 }`}
             >
               {msg.sender === "doctor" ? (
@@ -63,15 +63,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
               )}
             </div>
             <div
-              className={`rounded-xl p-4 shadow-sm
+              className={`rounded-2xl px-4 py-3 shadow-sm
                 ${
                   msg.sender === "doctor"
                     ? "bg-blue-600 text-white"
                     : "bg-white text-gray-800 border border-gray-200"
                 }`}
             >
-              <p className="text-sm leading-relaxed font-medium">{msg.content}</p>
-              <p className="text-xs mt-2 opacity-70 text-right">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+              <p className={`text-xs mt-2 opacity-70 ${msg.sender === "doctor" ? "text-left" : "text-right"}`}>
                 {msg.timestamp.toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",

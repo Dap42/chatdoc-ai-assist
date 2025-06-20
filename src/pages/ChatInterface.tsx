@@ -3,12 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   ArrowLeft,
   Trash2,
 } from "lucide-react";
@@ -47,7 +41,7 @@ const ChatInterface = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Effect to load recent chats from localStorage and keep them updated
+  // Load recent chats from localStorage
   useEffect(() => {
     const loadRecentChats = () => {
       const storedRecentChats = localStorage.getItem("recentChats");
@@ -66,29 +60,20 @@ const ChatInterface = () => {
     };
   }, []);
 
-  // Effect to load messages for the current chatId and set chat title
+  // Load messages for current chatId
   useEffect(() => {
     if (chatId) {
       const storedMessages = localStorage.getItem(`chat-${chatId}-messages`);
       if (storedMessages) {
-        setMessages(
-          JSON.parse(storedMessages).map((msg: Message) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp),
-          }))
-        );
+        const parsedMessages = JSON.parse(storedMessages).map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+        console.log("Loaded messages for chat:", chatId, parsedMessages);
+        setMessages(parsedMessages);
       } else {
-        const initialMessage: Message = {
-          id: `initial-msg-${chatId}`,
-          content: `Welcome to this consultation. This is the start of your chat session.`,
-          sender: "ai",
-          timestamp: new Date(),
-        };
-        setMessages([initialMessage]);
-        localStorage.setItem(
-          `chat-${chatId}-messages`,
-          JSON.stringify([initialMessage])
-        );
+        console.log("No stored messages found for chat:", chatId);
+        setMessages([]);
       }
 
       const currentChat = recentChats.find((chat) => chat.id === chatId);
@@ -112,11 +97,12 @@ const ChatInterface = () => {
       localStorage.setItem("recentChats", JSON.stringify(updatedChats));
       navigate(`/chat/${newChatId}`, { replace: true });
     }
-  }, [chatId, recentChats]);
+  }, [chatId, recentChats, navigate]);
 
-  // Effect to save messages to localStorage whenever they change for the current chatId
+  // Save messages to localStorage when they change
   useEffect(() => {
     if (chatId && messages.length > 0) {
+      console.log("Saving messages for chat:", chatId, messages);
       localStorage.setItem(`chat-${chatId}-messages`, JSON.stringify(messages));
     }
   }, [messages, chatId]);
@@ -133,15 +119,25 @@ const ChatInterface = () => {
     if (!message.trim() || !chatId) return;
 
     const newMessage: Message = {
-      id: Date.now().toString(),
-      content: message,
+      id: `msg-${Date.now()}`,
+      content: message.trim(),
       sender: "doctor",
       timestamp: new Date(),
     };
 
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    console.log("Sending new message:", newMessage);
+
+    // Add the message to the current messages
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages, newMessage];
+      console.log("Updated messages:", updatedMessages);
+      return updatedMessages;
+    });
+
+    // Clear the input
     setMessage("");
 
+    // Update recent chats
     setRecentChats((prevChats) => {
       const updatedChats = prevChats.map((chat) =>
         chat.id === chatId
@@ -152,18 +148,22 @@ const ChatInterface = () => {
       return updatedChats;
     });
 
+    // Simulate AI response
     setTimeout(() => {
       const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: `Medical terminology note: ${
-          newMessage.content.includes("headache")
-            ? "Cephalgia refers to head pain. Consider tension headaches, migraines, or cluster headaches."
-            : "Consider documenting symptoms systematically for accurate assessment."
-        }`,
+        id: `ai-${Date.now()}`,
+        content: `Thank you for your message. I understand you mentioned: "${newMessage.content}". How can I assist you further with this medical consultation?`,
         sender: "ai",
         timestamp: new Date(),
       };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
+      
+      console.log("Adding AI response:", aiResponse);
+      
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages, aiResponse];
+        console.log("Messages after AI response:", updatedMessages);
+        return updatedMessages;
+      });
     }, 1000);
   };
 
