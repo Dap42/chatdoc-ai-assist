@@ -1,18 +1,16 @@
-
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { 
-  Stethoscope, 
-  LayoutDashboard, 
-  MessageCircle, 
-  User, 
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  Stethoscope,
+  LayoutDashboard,
+  MessageCircle,
+  User,
   LogOut,
   Menu,
-  X
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { useState } from 'react';
+  X,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 interface DoctorLayoutProps {
   children: React.ReactNode;
@@ -26,41 +24,40 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/doctor-dashboard', icon: LayoutDashboard },
-    { name: 'Chat', href: '/chat', icon: MessageCircle },
-    { name: 'Profile', href: '/doctor-profile', icon: User },
+    { name: "Dashboard", href: "/doctor-dashboard", icon: LayoutDashboard },
+    { name: "Chat", href: "/chat", icon: MessageCircle },
+    { name: "Profile", href: "/doctor-profile", icon: User },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile sidebar overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-20 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
       )}
 
       {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
+      <div
+        className={`w-80 space-y-4 fixed inset-y-0 left-0 z-30 bg-white shadow-lg lg:translate-x-0`}
+      >
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <Link to="/" className="flex items-center space-x-2">
             <Stethoscope className="h-8 w-8 text-blue-600" />
             <span className="text-xl font-bold text-gray-900">Doctor AI</span>
           </Link>
-          <button 
-            onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden"
-          >
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden">
             <X className="h-6 w-6 text-gray-400" />
           </button>
         </div>
 
-        <nav className="mt-8 px-4">
+        <nav className="mt-8">
           <ul className="space-y-2">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
@@ -70,9 +67,10 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
                     to={item.href}
                     className={`
                       flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                      ${isActive 
-                        ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
+                      ${
+                        isActive
+                          ? "bg-blue-100 text-blue-700 border-r-2 border-blue-700"
+                          : "text-gray-700 hover:bg-gray-100"
                       }
                     `}
                     onClick={() => setIsSidebarOpen(false)}
@@ -83,10 +81,20 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
                 </li>
               );
             })}
+            <li key="signout" className="p-4">
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="absolute bottom-0 left-0 right-0 w-full border-red-300 text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
+            </li>
           </ul>
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+        <div className="p-4 border-t">
           <div className="flex items-center mb-4">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <User className="h-6 w-6 text-blue-600" />
@@ -96,37 +104,29 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
               <p className="text-xs text-gray-500">{user?.email}</p>
             </div>
           </div>
-          <Button 
-            onClick={handleLogout}
-            variant="outline" 
-            className="w-full border-red-300 text-red-600 hover:bg-red-50"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-0">
+      <div className={`flex-1 lg:ml-80`}>
         {/* Header */}
         <header className="bg-white shadow-sm border-b lg:hidden">
           <div className="flex items-center justify-between px-4 py-4">
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(true)}
               className="text-gray-500 hover:text-gray-700"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">Doctor Dashboard</h1>
+            <h1 className="text-lg font-semibold text-gray-900">
+              Doctor Dashboard
+            </h1>
             <div></div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="p-6">
-          {children}
-        </main>
+        <main className="p-6">{children}</main>
       </div>
     </div>
   );
