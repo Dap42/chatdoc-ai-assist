@@ -11,6 +11,7 @@ import {
   ChevronsRight,
   Search,
   Trash2,
+  Plus,
 } from "lucide-react";
 
 interface ChatSession {
@@ -72,23 +73,24 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   };
 
   return (
-    <div className={`${isSidebarCollapsed ? 'w-16' : 'w-80'} flex flex-col bg-white shadow-lg border-r transition-all duration-300 ease-in-out`}>
-      <div className="p-4 space-y-4">
+    <div className={`${isSidebarCollapsed ? 'w-16' : 'w-80'} flex flex-col bg-white shadow-xl border-r border-gray-200 transition-all duration-300 ease-in-out`}>
+      <div className="p-4 space-y-4 h-full flex flex-col">
+        {/* Header */}
         <div className="flex items-center justify-between">
           {!isSidebarCollapsed && (
             <Button
-              variant="outline"
-              className="flex-1 justify-start mr-2"
+              variant="default"
+              className="flex-1 justify-center mr-2 bg-blue-600 hover:bg-blue-700 text-white font-medium"
               onClick={onNewChat}
             >
-              <MessageCircle className="mr-2 h-4 w-4" /> New Chat
+              <Plus className="mr-2 h-4 w-4" /> New Chat
             </Button>
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="flex-shrink-0"
+            className="flex-shrink-0 hover:bg-gray-100"
           >
             {isSidebarCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
           </Button>
@@ -96,21 +98,23 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
         {!isSidebarCollapsed && (
           <>
+            {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search chats..."
-                className="w-full pl-9"
+                className="w-full pl-9 border-gray-300 focus:border-blue-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            <Card className="flex-1 flex flex-col">
-              <CardHeader className="px-4 py-3 flex flex-row items-center justify-between">
-                <CardTitle className="text-sm font-semibold text-gray-600 uppercase">
+            {/* Chats List */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
                   Recent Consultations
-                </CardTitle>
+                </h3>
                 {filteredChats.length > 0 && (
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -125,38 +129,45 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     />
                     <label
                       htmlFor="select-all-chats"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-xs font-medium text-gray-600"
                     >
-                      Select All
+                      All
                     </label>
                   </div>
                 )}
-              </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto space-y-2 px-4">
-                {selectedChats.length > 0 && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={onDeleteSelectedChats}
-                    className="w-full mb-4"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Selected ({selectedChats.length})
-                  </Button>
-                )}
+              </div>
+
+              {/* Delete Selected Button */}
+              {selectedChats.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={onDeleteSelectedChats}
+                  className="w-full mb-3"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Selected ({selectedChats.length})
+                </Button>
+              )}
+
+              {/* Chat Items */}
+              <div className="flex-1 overflow-y-auto space-y-2">
                 {filteredChats.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-4">
-                    No recent chats. Start a new one!
-                  </p>
+                  <div className="text-center py-8">
+                    <MessageCircle className="h-8 w-8 mx-auto text-gray-300 mb-2" />
+                    <p className="text-gray-500 text-sm">
+                      {searchTerm ? 'No chats found' : 'No recent chats. Start a new one!'}
+                    </p>
+                  </div>
                 ) : (
                   filteredChats.map((chat) => (
                     <div
                       key={chat.id}
-                      className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors
+                      className={`flex items-center p-3 rounded-lg cursor-pointer transition-all duration-200 border
                         ${
                           currentChatId === chat.id
-                            ? "bg-blue-100 text-blue-900"
-                            : "hover:bg-gray-100 text-gray-700"
+                            ? "bg-blue-50 border-blue-200 text-blue-900"
+                            : "hover:bg-gray-50 text-gray-700 border-transparent hover:border-gray-200"
                         }`}
                     >
                       <Checkbox
@@ -168,17 +179,21 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                         className="mr-3"
                       />
                       <div
-                        className="flex-1 flex items-center space-x-3"
+                        className="flex-1 flex items-start space-x-3 min-w-0"
                         onClick={() => onChatSelect(chat.id)}
                       >
-                        <MessageCircle className="h-4 w-4 text-gray-400" />
-                        <p className="font-medium text-sm">{chat.patientName}</p>
+                        <MessageCircle className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{chat.patientName}</p>
+                          <p className="text-xs text-gray-500 truncate mt-1">{chat.lastMessage}</p>
+                          <p className="text-xs text-gray-400 mt-1">{chat.time}</p>
+                        </div>
                       </div>
                     </div>
                   ))
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </>
         )}
       </div>

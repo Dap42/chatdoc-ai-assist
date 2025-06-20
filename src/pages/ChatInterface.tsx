@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  ChevronsLeft,
+  ArrowLeft,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import ChatSidebar from "../components/chat/ChatSidebar";
@@ -252,29 +254,40 @@ const ChatInterface = () => {
         onDeleteSelectedChats={handleDeleteSelectedChats}
       />
 
-      <Card className="flex-1 flex flex-col h-full bg-white rounded-none border-none shadow-none">
-        <CardHeader className="py-4 border-b bg-white">
+      <div className="flex-1 flex flex-col h-full bg-white">
+        {/* Header */}
+        <div className="py-4 px-6 border-b bg-white shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/doctor-dashboard")}
+                className="hover:bg-gray-100"
               >
-                <ChevronsLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
               </Button>
-              <CardTitle className="text-lg text-gray-900">
+              <h1 className="text-lg font-semibold text-gray-900">
                 {currentChatTitle}
-              </CardTitle>
+              </h1>
             </div>
             <div className="flex items-center space-x-2">
-              <Button variant="destructive" size="sm" onClick={handleClearChat}>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={handleClearChat}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
                 Clear Chat
               </Button>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="flex-1 p-6 bg-white overflow-hidden">
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 p-6 bg-gray-50 overflow-hidden">
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto mb-4">
               <ChatMessages messages={messages} messagesEndRef={messagesEndRef} />
@@ -287,8 +300,8 @@ const ChatInterface = () => {
               onKeyPress={handleKeyPress}
             />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

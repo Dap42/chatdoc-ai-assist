@@ -19,14 +19,14 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 max-w-2xl mx-auto">
         <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-        <p className="text-xl font-semibold mb-2">
+        <p className="text-xl font-semibold mb-2 text-gray-700">
           Start Your Medical Consultation
         </p>
-        <p className="text-base mt-1">
+        <p className="text-base mt-1 text-gray-600">
           Ask questions about patient cases, symptoms, treatment
           protocols, or medical procedures.
         </p>
-        <div className="mt-6 p-4 bg-blue-50 rounded-md text-gray-700 text-sm border border-blue-200">
+        <div className="mt-6 p-4 bg-blue-50 rounded-lg text-gray-700 text-sm border border-blue-200">
           Example: "I have a patient with acute chest pain and elevated
           troponin levels. What's the recommended treatment protocol?"
         </div>
@@ -63,14 +63,14 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
               )}
             </div>
             <div
-              className={`rounded-xl p-3
+              className={`rounded-xl p-4 shadow-sm
                 ${
                   msg.sender === "doctor"
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-800 border border-gray-200"
+                    : "bg-white text-gray-800 border border-gray-200"
                 }`}
             >
-              <p className="text-sm leading-relaxed">{msg.content}</p>
+              <p className="text-sm leading-relaxed font-medium">{msg.content}</p>
               <p className="text-xs mt-2 opacity-70 text-right">
                 {msg.timestamp.toLocaleTimeString([], {
                   hour: "2-digit",
