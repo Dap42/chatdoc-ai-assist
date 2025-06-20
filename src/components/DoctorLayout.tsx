@@ -30,7 +30,6 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
   const navigation = [
     { name: "Dashboard", href: "/doctor-dashboard", icon: LayoutDashboard },
     { name: "Chat", href: "/chat", icon: MessageCircle },
-    { name: "Profile", href: "/doctor-profile", icon: User },
   ];
 
   return (
@@ -45,7 +44,7 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
 
       {/* Sidebar */}
       <div
-        className={`w-80 space-y-4 fixed inset-y-0 left-0 z-30 bg-white shadow-lg lg:translate-x-0`}
+        className={`w-80 flex flex-col fixed inset-y-0 left-0 z-30 bg-white shadow-lg lg:translate-x-0`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <Link to="/" className="flex items-center space-x-2">
@@ -57,7 +56,7 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
           </button>
         </div>
 
-        <nav className="mt-8">
+        <nav className="flex-1 mt-8">
           <ul className="space-y-2">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
@@ -81,29 +80,31 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
                 </li>
               );
             })}
-            <li key="signout" className="p-4">
-              <Button
-                onClick={handleLogout}
-                variant="outline"
-                className="absolute bottom-0 left-0 right-0 w-full border-red-300 text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </li>
           </ul>
         </nav>
 
-        <div className="p-4 border-t">
-          <div className="flex items-center mb-4">
+        {/* User info and Sign Out at the bottom */}
+        <div className="mt-auto p-4 border-t">
+          <Link
+            to="/doctor-profile"
+            className="flex items-center cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition-colors w-full mb-2"
+            onClick={() => setIsSidebarOpen(false)}
+          >
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <User className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-              <p className="text-xs text-gray-500">{user?.email}</p>
             </div>
-          </div>
+          </Link>
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="w-full border-red-300 text-red-600 hover:bg-red-50"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
       </div>
 

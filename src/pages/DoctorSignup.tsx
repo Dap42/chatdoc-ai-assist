@@ -1,47 +1,68 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Stethoscope, User, Mail, Lock, GraduationCap, Calendar } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Stethoscope,
+  User,
+  Mail,
+  Lock,
+  GraduationCap,
+  Calendar,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const DoctorSignup = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    age: '',
-    gender: '',
-    degree: '',
-    qualifications: '',
-    bio: ''
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    age: "",
+    gender: "",
+    degree: "",
+    qualifications: "",
+    bio: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -52,17 +73,18 @@ const DoctorSignup = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
       // Mock registration - replace with real API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       toast({
         title: "Registration Successful",
-        description: "Your account has been created and is pending admin approval.",
+        description:
+          "Your account has been created and is pending admin approval.",
       });
-      
-      navigate('/login');
+
+      navigate("/login");
     } catch (error) {
       toast({
         title: "Registration Failed",
@@ -79,31 +101,23 @@ const DoctorSignup = () => {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+          >
             <Stethoscope className="h-8 w-8" />
             <span className="text-2xl font-bold">Doctor AI Chat</span>
           </Link>
         </div>
 
-        {/* Demo Credentials Alert */}
-        <Card className="mb-6 bg-blue-50 border-blue-200">
-          <CardContent className="pt-4">
-            <p className="text-sm text-blue-800 font-medium mb-2">🚀 Quick Demo Access</p>
-            <p className="text-sm text-blue-700 mb-3">
-              Want to try the platform immediately? Use these demo credentials on the login page:
-            </p>
-            <div className="bg-white p-3 rounded border border-blue-200">
-              <p className="text-xs font-mono text-blue-900">Email: doctor@demo.com</p>
-              <p className="text-xs font-mono text-blue-900">Password: password123</p>
-            </div>
-          </CardContent>
-        </Card>
-
         <Card className="border-blue-100 shadow-lg">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-gray-900">Doctor Registration</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-900">
+              Doctor Registration
+            </CardTitle>
             <CardDescription>
-              Create your professional account to join our AI-powered healthcare platform
+              Create your professional account to join our AI-powered healthcare
+              platform
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -166,7 +180,12 @@ const DoctorSignup = () => {
 
                 <div className="space-y-2">
                   <Label>Gender *</Label>
-                  <Select onValueChange={(value) => handleSelectChange('gender', value)} required>
+                  <Select
+                    onValueChange={(value) =>
+                      handleSelectChange("gender", value)
+                    }
+                    required
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -174,7 +193,9 @@ const DoctorSignup = () => {
                       <SelectItem value="male">Male</SelectItem>
                       <SelectItem value="female">Female</SelectItem>
                       <SelectItem value="other">Other</SelectItem>
-                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                      <SelectItem value="prefer-not-to-say">
+                        Prefer not to say
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -197,7 +218,9 @@ const DoctorSignup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="qualifications">Professional Qualifications *</Label>
+                <Label htmlFor="qualifications">
+                  Professional Qualifications *
+                </Label>
                 <Textarea
                   id="qualifications"
                   name="qualifications"
@@ -260,19 +283,22 @@ const DoctorSignup = () => {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 disabled={isLoading}
               >
-                {isLoading ? 'Creating Account...' : 'Create Doctor Account'}
+                {isLoading ? "Creating Account..." : "Create Doctor Account"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Already have an account?{' '}
-                <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
                   Sign In
                 </Link>
               </p>
@@ -283,10 +309,13 @@ const DoctorSignup = () => {
         {/* Disclaimer */}
         <Card className="mt-6 bg-blue-50 border-blue-200">
           <CardContent className="pt-4">
-            <p className="text-sm text-blue-800 font-medium mb-2">Account Approval Process</p>
+            <p className="text-sm text-blue-800 font-medium mb-2">
+              Account Approval Process
+            </p>
             <p className="text-sm text-blue-700">
-              All doctor registrations require admin approval to ensure platform security and compliance. 
-              You will be notified via email once your account is approved and ready for use.
+              All doctor registrations require admin approval to ensure platform
+              security and compliance. You will be notified via email once your
+              account is approved and ready for use.
             </p>
           </CardContent>
         </Card>

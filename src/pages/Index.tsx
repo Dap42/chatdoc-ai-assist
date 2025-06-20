@@ -31,20 +31,20 @@ const Index = () => {
               </h1>
             </div>
             <div className="flex space-x-4">
-              <Link to="/login">
+              <Link to="/doctor-signup">
                 <Button
                   variant="outline"
                   className="border-blue-600 text-blue-600 hover:bg-blue-50"
                 >
-                  Doctor Login
+                  Register as Doctor
                 </Button>
               </Link>
-              <Link to="/admin-login">
+              <Link to="/admin-signup">
                 <Button
                   variant="outline"
                   className="border-gray-600 text-gray-600 hover:bg-gray-50"
                 >
-                  Admin Login
+                  Register as Admin
                 </Button>
               </Link>
             </div>

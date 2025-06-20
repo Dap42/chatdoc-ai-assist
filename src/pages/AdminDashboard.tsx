@@ -52,6 +52,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Doctor {
   id: string;
@@ -71,11 +72,19 @@ interface Document {
 }
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDoctorViewOpen, setIsDoctorViewOpen] = useState(false);
+  const [viewedDoctor, setViewedDoctor] = useState<Doctor | null>(null);
+  const [isDocumentViewOpen, setIsDocumentViewOpen] = useState(false);
+  const [viewedDocument, setViewedDocument] = useState<Document | null>(null);
+  const [isAiInsightsOpen, setIsAiInsightsOpen] = useState(false);
+  const [isContentEngagementOpen, setIsContentEngagementOpen] = useState(false);
+  const [isUserFeedbackOpen, setIsUserFeedbackOpen] = useState(false);
 
   useEffect(() => {
     // Mock data for doctors
@@ -147,6 +156,34 @@ const AdminDashboard = () => {
       title: `Doctor ${actionText}`,
       description: `Doctor account has been ${actionText} successfully.`,
     });
+  };
+
+  const handleSignOut = () => {
+    logout();
+    navigate("/admin-login");
+    toast({
+      title: "Signed Out",
+      description: "You have been successfully signed out.",
+    });
+  };
+
+  const handleViewDoctor = (doctor: Doctor) => {
+    setViewedDoctor(doctor);
+    setIsDoctorViewOpen(true);
+  };
+
+  const handleViewDocument = (document: Document) => {
+    setViewedDocument(document);
+    setIsDocumentViewOpen(true);
+  };
+
+  const handleDownloadDocument = (document: Document) => {
+    toast({
+      title: "Download Initiated",
+      description: `Downloading "${document.name}"... (simulated)`,
+    });
+    // In a real application, you would initiate the file download here.
+    // For example: window.open(`/api/documents/download/${document.id}`, '_blank');
   };
 
   const handleFileUpload = () => {
@@ -229,9 +266,7 @@ const AdminDashboard = () => {
               <Button
                 variant="outline"
                 className="border-red-300 text-red-600 hover:bg-red-50"
-                onClick={() => {
-                  /* Implement logout logic here */
-                }}
+                onClick={handleSignOut}
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
@@ -309,7 +344,10 @@ const AdminDashboard = () => {
 
         {/* New Admin Functions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card>
+          <Card
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => setIsAiInsightsOpen(true)}
+          >
             <CardHeader>
               <CardTitle>AI Interaction Insights</CardTitle>
               <CardDescription>
@@ -346,7 +384,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => setIsContentEngagementOpen(true)}
+          >
             <CardHeader>
               <CardTitle>Content Engagement</CardTitle>
               <CardDescription>
@@ -381,7 +422,10 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card
+            className="cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => setIsUserFeedbackOpen(true)}
+          >
             <CardHeader>
               <CardTitle>User Feedback & Support</CardTitle>
               <CardDescription>
@@ -484,7 +528,11 @@ const AdminDashboard = () => {
                                 </>
                               )}
                               {doctor.status !== "pending" && (
-                                <Button size="sm" variant="outline">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewDoctor(doctor)}
+                                >
                                   <Eye className="h-4 w-4 mr-1" />
                                   View
                                 </Button>
@@ -499,6 +547,47 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          {/* Doctor View Dialog */}
+          <Dialog open={isDoctorViewOpen} onOpenChange={setIsDoctorViewOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Doctor Details</DialogTitle>
+                <DialogDescription>
+                  Detailed information about {viewedDoctor?.name}
+                </DialogDescription>
+              </DialogHeader>
+              {viewedDoctor && (
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label className="text-sm font-medium">Name</Label>
+                    <p className="text-lg font-semibold">{viewedDoctor.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Email</Label>
+                    <p className="text-lg">{viewedDoctor.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Specialty</Label>
+                    <p className="text-lg">{viewedDoctor.specialty}</p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Registration Date
+                    </Label>
+                    <p className="text-lg">
+                      {viewedDoctor.registrationDate.toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium">Status</Label>
+                    <p className="text-lg">
+                      {getStatusBadge(viewedDoctor.status)}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Document Management Tab */}
           <TabsContent value="documents">
@@ -569,11 +658,19 @@ const AdminDashboard = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex space-x-2">
-                                <Button size="sm" variant="outline">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleViewDocument(doc)}
+                                >
                                   <Eye className="h-4 w-4 mr-1" />
                                   View
                                 </Button>
-                                <Button size="sm" variant="outline">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleDownloadDocument(doc)}
+                                >
                                   <Download className="h-4 w-4 mr-1" />
                                   Download
                                 </Button>
@@ -590,6 +687,128 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {/* Document View Dialog */}
+      <Dialog open={isDocumentViewOpen} onOpenChange={setIsDocumentViewOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Document Details</DialogTitle>
+            <DialogDescription>
+              Detailed information about {viewedDocument?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {viewedDocument && (
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm font-medium">Document Name</Label>
+                <p className="text-lg font-semibold">{viewedDocument.name}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Upload Date</Label>
+                <p className="text-lg">
+                  {viewedDocument.uploadDate.toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">File Size</Label>
+                <p className="text-lg">{viewedDocument.size}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Type</Label>
+                <p className="text-lg">
+                  <Badge variant="outline">{viewedDocument.type}</Badge>
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* AI Interaction Insights Dialog */}
+      <Dialog open={isAiInsightsOpen} onOpenChange={setIsAiInsightsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Detailed AI Interaction Insights</DialogTitle>
+            <DialogDescription>
+              In-depth metrics on how doctors engage with the AI assistant.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p>
+              This section would display detailed graphs, charts, and tables
+              related to AI interaction, such as:
+            </p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Query trends over time</li>
+              <li>Breakdown of queries by specialty/category</li>
+              <li>AI suggestion acceptance rate by doctor/specialty</li>
+              <li>Commonly asked questions</li>
+              <li>AI response effectiveness ratings</li>
+            </ul>
+            <p className="text-sm text-gray-500">
+              (Placeholder content for detailed AI insights)
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Content Engagement Dialog */}
+      <Dialog
+        open={isContentEngagementOpen}
+        onOpenChange={setIsContentEngagementOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Detailed Content Engagement</DialogTitle>
+            <DialogDescription>
+              Comprehensive data on popular documents and resources accessed by
+              doctors.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p>
+              This section would display detailed information about content
+              engagement, such as:
+            </p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Most viewed documents with view counts</li>
+              <li>Most downloaded documents with download counts</li>
+              <li>Document access trends</li>
+              <li>Popular search terms for documents</li>
+              <li>Feedback on document usefulness</li>
+            </ul>
+            <p className="text-sm text-gray-500">
+              (Placeholder content for detailed content engagement)
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Feedback & Support Dialog */}
+      <Dialog open={isUserFeedbackOpen} onOpenChange={setIsUserFeedbackOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Detailed User Feedback & Support</DialogTitle>
+            <DialogDescription>
+              In-depth overview of doctor feedback and support requests.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p>
+              This section would display detailed information about user
+              feedback and support, such as:
+            </p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>List of recent feedback submissions</li>
+              <li>Support ticket status and resolution times</li>
+              <li>Common feedback themes/categories</li>
+              <li>Doctor satisfaction ratings</li>
+              <li>Support agent performance metrics</li>
+            </ul>
+            <p className="text-sm text-gray-500">
+              (Placeholder content for detailed user feedback and support)
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

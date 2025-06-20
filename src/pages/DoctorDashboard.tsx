@@ -1,6 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
 import {
   Card,
   CardContent,
@@ -16,13 +17,104 @@ import {
   Clock,
   Users,
   Brain,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import DoctorLayout from "../components/DoctorLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface ChatSession {
+  id: string;
+  patientName: string;
+  lastMessage: string;
+  time: string;
+  status: "active" | "completed" | "pending";
+}
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [recentChats, setRecentChats] = useState<ChatSession[]>([]);
+  const [selectedChats, setSelectedChats] = useState<string[]>([]); // New state for selected chats
+
+  // Effect to load recent chats from localStorage and keep them updated
+  useEffect(() => {
+    const loadRecentChats = () => {
+      const storedChats = localStorage.getItem("recentChats");
+      if (storedChats) {
+        setRecentChats(JSON.parse(storedChats));
+      } else {
+        setRecentChats([]); // Initialize as empty if nothing in storage
+      }
+    };
+
+    loadRecentChats(); // Load on initial mount
+
+    // Listen for storage events to update recent chats across tabs/windows
+    window.addEventListener("storage", loadRecentChats);
+
+    return () => {
+      window.removeEventListener("storage", loadRecentChats);
+    };
+  }, []); // Empty dependency array means this runs once on mount and cleanup on unmount
+
+  const handleNewChat = () => {
+    const newChatId = `chat-${Date.now()}`;
+    const newChat: ChatSession = {
+      id: newChatId,
+      patientName: `New Patient ${recentChats.length + 1}`,
+      lastMessage: "No messages yet",
+      time: "Just now",
+      status: "active",
+    };
+
+    const updatedChats = [newChat, ...recentChats];
+    setRecentChats(updatedChats);
+    localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+    navigate(`/chat/${newChatId}`);
+  };
+
+  const handleSelectAllChats = (isChecked: boolean) => {
+    if (isChecked) {
+      const allChatIds = recentChats.map((chat) => chat.id);
+      setSelectedChats(allChatIds);
+    } else {
+      setSelectedChats([]);
+    }
+  };
+
+  const handleSelectChat = (chatId: string, isChecked: boolean) => {
+    setSelectedChats((prevSelected) =>
+      isChecked
+        ? [...prevSelected, chatId]
+        : prevSelected.filter((id) => id !== chatId)
+    );
+  };
+
+  const handleDeleteSelectedChats = () => {
+    if (selectedChats.length === 0) return;
+
+    // Remove selected chats from recentChats
+    const updatedChats = recentChats.filter(
+      (chat) => !selectedChats.includes(chat.id)
+    );
+    setRecentChats(updatedChats);
+    localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+
+    // Remove associated messages from localStorage for each selected chat
+    selectedChats.forEach((chatId) => {
+      localStorage.removeItem(`chat-${chatId}-messages`);
+    });
+
+    // Clear selection
+    setSelectedChats([]);
+
+    // If any deleted chat was the currently viewed one, navigate to dashboard
+    const currentPathChatId = window.location.pathname.split("/").pop();
+    if (currentPathChatId && selectedChats.includes(currentPathChatId)) {
+      navigate("/doctor-dashboard");
+    }
+  };
 
   // Mock data - replace with real API calls
   const stats = {
@@ -31,30 +123,6 @@ const DoctorDashboard = () => {
     todayChats: 8,
     aiAssists: 45,
   };
-
-  const recentChats = [
-    {
-      id: 1,
-      patientName: "Patient A",
-      lastMessage: "Thank you for the consultation",
-      time: "2 min ago",
-      status: "active",
-    },
-    {
-      id: 2,
-      patientName: "Patient B",
-      lastMessage: "I have been feeling better",
-      time: "15 min ago",
-      status: "completed",
-    },
-    {
-      id: 3,
-      patientName: "Patient C",
-      lastMessage: "Could you please clarify...",
-      time: "1 hour ago",
-      status: "pending",
-    },
-  ];
 
   return (
     <DoctorLayout>
@@ -76,21 +144,116 @@ const DoctorDashboard = () => {
             <CardDescription>Common tasks and actions</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link to="/chat">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Start New Chat
-              </Button>
-            </Link>
-            <Link to="/doctor-profile">
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 h-12"
+              onClick={handleNewChat}
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Start New Chat
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-12 border-blue-600 text-blue-600 hover:bg-blue-50"
+              onClick={() =>
+                recentChats.length > 0 && navigate(`/chat/${recentChats[0].id}`)
+              }
+            >
+              <MessageCircle className="mr-2 h-4 w-4" />
+              Chat History
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Recent Chats */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div className="flex items-center space-x-2">
+              <CardTitle className="text-2xl font-bold">Recent Chats</CardTitle>
+              {recentChats.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="select-all-chats"
+                    checked={
+                      selectedChats.length === recentChats.length &&
+                      recentChats.length > 0
+                    }
+                    onCheckedChange={(isChecked: boolean) =>
+                      handleSelectAllChats(isChecked)
+                    }
+                  />
+                  <label
+                    htmlFor="select-all-chats"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Select All
+                  </label>
+                </div>
+              )}
+            </div>
+            {selectedChats.length > 0 && (
               <Button
-                variant="outline"
-                className="w-full h-12 border-blue-600 text-blue-600 hover:bg-blue-50"
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelectedChats}
+                className="ml-auto"
               >
-                <User className="mr-2 h-4 w-4" />
-                Update Profile
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Selected ({selectedChats.length})
               </Button>
-            </Link>
+            )}
+          </CardHeader>
+          <CardDescription className="px-6 pb-4">
+            Your most recent patient consultations
+          </CardDescription>
+          <CardContent>
+            {recentChats.length === 0 ? (
+              <p className="text-gray-500">No recent chats. Start a new one!</p>
+            ) : (
+              <div className="space-y-4">
+                {recentChats.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className="flex items-center p-3 border rounded-md hover:bg-gray-50"
+                  >
+                    <Checkbox
+                      id={`checkbox-${chat.id}`}
+                      checked={selectedChats.includes(chat.id)}
+                      onCheckedChange={(isChecked: boolean) =>
+                        handleSelectChat(chat.id, isChecked)
+                      }
+                      className="mr-4"
+                    />
+                    <Link
+                      to={`/chat/${chat.id}`}
+                      className="flex-1 flex items-center justify-between"
+                    >
+                      <div>
+                        <p className="font-medium">{chat.patientName}</p>
+                        <p className="text-sm text-gray-500">
+                          {chat.lastMessage}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge
+                          variant={
+                            chat.status === "active"
+                              ? "default"
+                              : chat.status === "completed"
+                              ? "secondary"
+                              : "outline"
+                          }
+                        >
+                          {chat.status}
+                        </Badge>
+                        <span className="text-sm text-gray-400">
+                          {chat.time}
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
