@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox"; // Import Checkbox
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Send,
   Bot,
@@ -26,7 +26,9 @@ import {
   LogOut,
   Search,
   Trash2,
-  Mic, // Import Mic icon
+  Mic,
+  Menu,
+  X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -52,10 +54,11 @@ const ChatInterface = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [recentChats, setRecentChats] = useState<ChatSession[]>([]);
-  const [selectedChats, setSelectedChats] = useState<string[]>([]); // New state for selected chats
+  const [selectedChats, setSelectedChats] = useState<string[]>([]);
   const [currentChatTitle, setCurrentChatTitle] = useState(
     "Medical Consultation"
   );
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -296,115 +299,133 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-900">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
       {/* Sidebar */}
-      <div className="w-80 flex flex-col bg-gray-900 shadow-lg p-4 space-y-4">
-        <Button
-          variant="outline"
-          className="w-full justify-start border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
-          onClick={handleNewChat}
-        >
-          <MessageCircle className="mr-2 h-4 w-4" /> New Chat
-        </Button>
-
-        <div className="relative mt-4 mb-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search chats..."
-            className="w-full pl-9 pr-3 py-2 rounded-md border border-gray-700 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <Card className="flex-1 flex flex-col border-gray-700 shadow-md bg-gray-900">
-          <CardHeader className="px-0 py-2 flex flex-row items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-gray-400 uppercase">
-              Recent Consultations
-            </CardTitle>
-            {filteredChats.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="select-all-chats"
-                  checked={
-                    selectedChats.length === filteredChats.length &&
-                    filteredChats.length > 0
-                  }
-                  onCheckedChange={(isChecked: boolean) =>
-                    handleSelectAllChats(isChecked)
-                  }
-                />
-                <label
-                  htmlFor="select-all-chats"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Select All
-                </label>
-              </div>
-            )}
-          </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto space-y-2 px-0">
-            {selectedChats.length > 0 && (
+      <div className={`${isSidebarCollapsed ? 'w-16' : 'w-80'} flex flex-col bg-white shadow-lg border-r transition-all duration-300 ease-in-out`}>
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            {!isSidebarCollapsed && (
               <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteSelectedChats}
-                className="w-full mb-4"
+                variant="outline"
+                className="flex-1 justify-start mr-2"
+                onClick={handleNewChat}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedChats.length})
+                <MessageCircle className="mr-2 h-4 w-4" /> New Chat
               </Button>
             )}
-            {filteredChats.length === 0 ? (
-              <p className="text-gray-400 text-sm text-center py-4">
-                No recent chats. Start a new one!
-              </p>
-            ) : (
-              filteredChats.map((chat) => (
-                <div
-                  key={chat.id}
-                  className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors
-                    ${
-                      chatId === chat.id
-                        ? "bg-gray-700 text-white"
-                        : "hover:bg-gray-800 text-gray-300"
-                    }`}
-                >
-                  <Checkbox
-                    id={`checkbox-${chat.id}`}
-                    checked={selectedChats.includes(chat.id)}
-                    onCheckedChange={(isChecked: boolean) =>
-                      handleSelectChat(chat.id, isChecked)
-                    }
-                    className="mr-3"
-                  />
-                  <div
-                    className="flex-1 flex items-center space-x-3"
-                    onClick={() => handleChatSelect(chat.id)}
-                  >
-                    <MessageCircle className="h-4 w-4 text-gray-400" />
-                    <p className="font-medium text-sm">{chat.patientName}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="flex-shrink-0"
+            >
+              {isSidebarCollapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+            </Button>
+          </div>
+
+          {!isSidebarCollapsed && (
+            <>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search chats..."
+                  className="w-full pl-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <Card className="flex-1 flex flex-col">
+                <CardHeader className="px-4 py-3 flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm font-semibold text-gray-600 uppercase">
+                    Recent Consultations
+                  </CardTitle>
+                  {filteredChats.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="select-all-chats"
+                        checked={
+                          selectedChats.length === filteredChats.length &&
+                          filteredChats.length > 0
+                        }
+                        onCheckedChange={(isChecked: boolean) =>
+                          handleSelectAllChats(isChecked)
+                        }
+                      />
+                      <label
+                        htmlFor="select-all-chats"
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Select All
+                      </label>
+                    </div>
+                  )}
+                </CardHeader>
+                <CardContent className="flex-1 overflow-y-auto space-y-2 px-4">
+                  {selectedChats.length > 0 && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteSelectedChats}
+                      className="w-full mb-4"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Selected ({selectedChats.length})
+                    </Button>
+                  )}
+                  {filteredChats.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">
+                      No recent chats. Start a new one!
+                    </p>
+                  ) : (
+                    filteredChats.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className={`flex items-center p-3 rounded-lg cursor-pointer transition-colors
+                          ${
+                            chatId === chat.id
+                              ? "bg-blue-100 text-blue-900"
+                              : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                      >
+                        <Checkbox
+                          id={`checkbox-${chat.id}`}
+                          checked={selectedChats.includes(chat.id)}
+                          onCheckedChange={(isChecked: boolean) =>
+                            handleSelectChat(chat.id, isChecked)
+                          }
+                          className="mr-3"
+                        />
+                        <div
+                          className="flex-1 flex items-center space-x-3"
+                          onClick={() => handleChatSelect(chat.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 text-gray-400" />
+                          <p className="font-medium text-sm">{chat.patientName}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Chat Area */}
-      <Card className="flex-1 flex flex-col h-full bg-gray-900 rounded-none border-none shadow-none">
-        <CardHeader className="py-3 border-b border-gray-200 bg-gray-900 rounded-none shadow-sm">
+      <Card className="flex-1 flex flex-col h-full bg-white rounded-none border-none shadow-none">
+        <CardHeader className="py-4 border-b bg-white">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/doctor-dashboard")}
               >
-                <ChevronsLeft className="h-4 w-4 text-gray-400" />
+                <ChevronsLeft className="h-4 w-4" />
               </Button>
-              <CardTitle className="text-lg text-white">
+              <CardTitle className="text-lg text-gray-900">
                 {currentChatTitle}
               </CardTitle>
             </div>
@@ -415,99 +436,103 @@ const ChatInterface = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 p-4 py-8 bg-gray-900">
-          <div className="flex flex-col h-full overflow-y-auto">
-            {messages.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-400 max-w-2xl mx-auto">
-                <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-xl font-semibold mb-2">
-                  Start Your Medical Consultation
-                </p>
-                <p className="text-base mt-1">
-                  Ask questions about patient cases, symptoms, treatment
-                  protocols, or medical Protocols.
-                </p>
-                <div className="mt-6 p-4 bg-gray-700 rounded-md text-gray-300 text-sm border border-gray-600">
-                  Example: "I have a patient with acute chest pain and elevated
-                  troponin levels. What's the recommended treatment protocol?"
+        <CardContent className="flex-1 p-6 bg-white overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto mb-4">
+              {messages.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 max-w-2xl mx-auto">
+                  <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-xl font-semibold mb-2">
+                    Start Your Medical Consultation
+                  </p>
+                  <p className="text-base mt-1">
+                    Ask questions about patient cases, symptoms, treatment
+                    protocols, or medical procedures.
+                  </p>
+                  <div className="mt-6 p-4 bg-blue-50 rounded-md text-gray-700 text-sm border border-blue-200">
+                    Example: "I have a patient with acute chest pain and elevated
+                    troponin levels. What's the recommended treatment protocol?"
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="space-y-6 w-full max-w-3xl mx-auto">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${
-                      msg.sender === "doctor" ? "justify-end" : "justify-start"
-                    }`}
-                  >
+              ) : (
+                <div className="space-y-6 w-full max-w-3xl mx-auto">
+                  {messages.map((msg) => (
                     <div
-                      className={`flex items-start gap-3 max-w-[80%] ${
-                        msg.sender === "doctor" ? "flex-row-reverse" : ""
+                      key={msg.id}
+                      className={`flex ${
+                        msg.sender === "doctor" ? "justify-end" : "justify-start"
                       }`}
                     >
                       <div
-                        className={`w-8 h-8 rounded-sm flex items-center justify-center flex-shrink-0
-                          ${
-                            msg.sender === "doctor"
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-700 text-gray-300"
-                          }`}
+                        className={`flex items-start gap-3 max-w-[80%] ${
+                          msg.sender === "doctor" ? "flex-row-reverse" : ""
+                        }`}
                       >
-                        {msg.sender === "doctor" ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <Bot className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div
-                        className={`rounded-xl p-3
-                          ${
-                            msg.sender === "doctor"
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-700 text-gray-300 border border-gray-600"
-                          }`}
-                      >
-                        <p className="text-sm leading-relaxed">{msg.content}</p>
-                        <p className="text-xs mt-2 text-gray-400 text-right">
-                          {msg.timestamp.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                            ${
+                              msg.sender === "doctor"
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-200 text-gray-600"
+                            }`}
+                        >
+                          {msg.sender === "doctor" ? (
+                            <User className="h-4 w-4" />
+                          ) : (
+                            <Bot className="h-4 w-4" />
+                          )}
+                        </div>
+                        <div
+                          className={`rounded-xl p-3
+                            ${
+                              msg.sender === "doctor"
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-100 text-gray-800 border border-gray-200"
+                            }`}
+                        >
+                          <p className="text-sm leading-relaxed">{msg.content}</p>
+                          <p className="text-xs mt-2 opacity-70 text-right">
+                            {msg.timestamp.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+            
+            {/* Message Input - Fixed at bottom */}
+            <div className="border-t pt-4 bg-white">
+              <div className="w-full max-w-3xl mx-auto bg-white border border-gray-300 rounded-full shadow-sm flex items-center">
+                <textarea
+                  ref={textareaRef}
+                  placeholder="Ask anything..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  className="flex-1 bg-transparent text-gray-900 placeholder-gray-500 px-5 py-3 min-h-[56px] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none text-base border-none"
+                  rows={1}
+                  style={{ overflowY: "hidden" }}
+                />
+                <div className="flex items-center pr-2">
+                  <Button
+                    onClick={handleSendMessage}
+                    className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
+                    size="icon"
+                    disabled={!message.trim()}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            )}
-          </div>
-        </CardContent>
-        {/* Message Input */}
-        <div className="p-4 border-t-0 bg-gray-900 flex items-center justify-center shadow-none">
-          <div className="w-full max-w-3xl bg-gray-800 rounded-full shadow-lg flex items-center">
-            <textarea
-              ref={textareaRef}
-              placeholder="Ask anything"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              className="flex-1 bg-transparent text-white placeholder-gray-400 px-5 py-3 min-h-[56px] focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none text-base"
-              rows={1}
-              style={{ overflowY: "hidden" }}
-            />
-            <div className="flex items-center pr-2">
-              <Button
-                onClick={handleSendMessage}
-                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
-                size="icon"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
             </div>
           </div>
-        </div>
+        </CardContent>
       </Card>
     </div>
   );
