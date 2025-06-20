@@ -1,11 +1,7 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatMessages from "../components/chat/ChatMessages";
@@ -23,7 +19,6 @@ interface ChatSession {
   patientName: string;
   lastMessage: string;
   time: string;
-  status: "active" | "completed" | "pending";
 }
 
 const ChatInterface = () => {
@@ -41,9 +36,28 @@ const ChatInterface = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Load recent chats from localStorage
+  // Load recent chats from localStorage on component mount and update old names
   useEffect(() => {
-    const loadRecentChats = () => {
+    const storedRecentChats = localStorage.getItem("recentChats");
+    if (storedRecentChats) {
+      let parsedChats: ChatSession[] = JSON.parse(storedRecentChats);
+
+      // Update existing "New Patient" names to "New Consultation"
+      const updatedChats = parsedChats.map((chat) => {
+        if (chat.patientName.startsWith("New Patient")) {
+          const patientNumber = chat.patientName.split(" ")[2];
+          return { ...chat, patientName: `New Consultation ${patientNumber}` };
+        }
+        return chat;
+      });
+      setRecentChats(updatedChats);
+      localStorage.setItem("recentChats", JSON.stringify(updatedChats)); // Persist the updated names
+    }
+  }, []);
+
+  // Effect to handle storage changes for recent chats
+  useEffect(() => {
+    const handleStorageChange = () => {
       const storedRecentChats = localStorage.getItem("recentChats");
       if (storedRecentChats) {
         setRecentChats(JSON.parse(storedRecentChats));
@@ -52,15 +66,13 @@ const ChatInterface = () => {
       }
     };
 
-    loadRecentChats();
-    window.addEventListener("storage", loadRecentChats);
-
+    window.addEventListener("storage", handleStorageChange);
     return () => {
-      window.removeEventListener("storage", loadRecentChats);
+      window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
-  // Load messages for current chatId
+  // Load messages for current chatId and manage new chat creation
   useEffect(() => {
     if (chatId) {
       const storedMessages = localStorage.getItem(`chat-${chatId}-messages`);
@@ -69,35 +81,39 @@ const ChatInterface = () => {
           ...msg,
           timestamp: new Date(msg.timestamp),
         }));
-        console.log("Loaded messages for chat:", chatId, parsedMessages);
         setMessages(parsedMessages);
       } else {
-        console.log("No stored messages found for chat:", chatId);
         setMessages([]);
       }
 
+      // Update chat title based on current chat
       const currentChat = recentChats.find((chat) => chat.id === chatId);
       if (currentChat) {
         setCurrentChatTitle(currentChat.patientName);
       } else {
+        // Fallback title if chat not found in recentChats (e.g., direct link)
         setCurrentChatTitle(
           `Chat with ${chatId.substring(chatId.indexOf("-") + 1)}`
         );
       }
+    } else if (recentChats.length > 0) {
+      // If no chatId in URL but recent chats exist, navigate to the first one
+      navigate(`/chat/${recentChats[0].id}`, { replace: true });
     } else {
+      // If no chatId and no recent chats, create a new one
       const newChatId = `chat-${Date.now()}`;
       const newChat: ChatSession = {
         id: newChatId,
-        patientName: `New Patient ${recentChats.length + 1}`,
+        patientName: `New Consultation ${recentChats.length + 1}`,
         lastMessage: "No messages yet",
         time: "Just now",
-        status: "active",
       };
       const updatedChats = [newChat, ...recentChats];
       localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+      setRecentChats(updatedChats); // Update state immediately
       navigate(`/chat/${newChatId}`, { replace: true });
     }
-  }, [chatId, recentChats, navigate]);
+  }, [chatId, navigate, recentChats]); // Added recentChats to dependency array for title update logic
 
   // Save messages to localStorage when they change
   useEffect(() => {
@@ -130,7 +146,14 @@ const ChatInterface = () => {
     // Add the message to the current messages
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages, newMessage];
-      console.log("Updated messages:", updatedMessages);
+      console.log("Updated messages (doctor):", updatedMessages);
+      // Immediately save the updated messages to localStorage
+      if (chatId) {
+        localStorage.setItem(
+          `chat-${chatId}-messages`,
+          JSON.stringify(updatedMessages)
+        );
+      }
       return updatedMessages;
     });
 
@@ -156,12 +179,19 @@ const ChatInterface = () => {
         sender: "ai",
         timestamp: new Date(),
       };
-      
+
       console.log("Adding AI response:", aiResponse);
-      
+
       setMessages((prevMessages) => {
         const updatedMessages = [...prevMessages, aiResponse];
         console.log("Messages after AI response:", updatedMessages);
+        // Save messages again after AI response
+        if (chatId) {
+          localStorage.setItem(
+            `chat-${chatId}-messages`,
+            JSON.stringify(updatedMessages)
+          );
+        }
         return updatedMessages;
       });
     }, 1000);
@@ -178,10 +208,9 @@ const ChatInterface = () => {
     const newChatId = `chat-${Date.now()}`;
     const newChat: ChatSession = {
       id: newChatId,
-      patientName: `New Patient ${recentChats.length + 1}`,
+      patientName: `New Consultation ${recentChats.length + 1}`,
       lastMessage: "No messages yet",
       time: "Just now",
-      status: "active",
     };
 
     const updatedChats = [newChat, ...recentChats];
@@ -228,7 +257,6 @@ const ChatInterface = () => {
             ? {
                 ...chat,
                 lastMessage: "Chat cleared",
-                status: "completed" as "completed",
               }
             : chat
         );
@@ -273,9 +301,9 @@ const ChatInterface = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="destructive" 
-                size="sm" 
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={handleClearChat}
                 className="bg-red-600 hover:bg-red-700"
               >
@@ -290,9 +318,12 @@ const ChatInterface = () => {
         <div className="flex-1 p-6 bg-gray-50 overflow-hidden">
           <div className="flex flex-col h-full">
             <div className="flex-1 overflow-y-auto mb-4">
-              <ChatMessages messages={messages} messagesEndRef={messagesEndRef} />
+              <ChatMessages
+                messages={messages}
+                messagesEndRef={messagesEndRef}
+              />
             </div>
-            
+
             <ChatInput
               message={message}
               setMessage={setMessage}

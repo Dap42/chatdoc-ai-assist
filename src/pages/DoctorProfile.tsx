@@ -1,61 +1,108 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Mail, GraduationCap, Save, UploadCloud, Shield, CheckCheck, Building } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import DoctorLayout from '../components/DoctorLayout';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  User,
+  Mail,
+  GraduationCap,
+  Save,
+  UploadCloud,
+  Shield,
+  CheckCheck,
+  Building,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import DoctorLayout from "../components/DoctorLayout";
+import { useAuth } from "../contexts/AuthContext";
 
 const DoctorProfile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth(); // Destructure updateUser
   const { toast } = useToast();
-  
-  // Mock profile data
-  const [profile, setProfile] = useState({
-    fullName: user?.name || 'Dr. John Smith',
-    email: user?.email || 'doctor@example.com',
-    age: '45',
-    gender: 'male',
-    specialty: 'Cardiology',
-    degree: 'MD, MBBS',
-    yearsOfPractice: '15',
-    hospital: 'Central Hospital',
-    bio: 'Experienced cardiologist specialized in interventional procedures with a focus on preventative cardiac care and lifestyle modifications.',
-    qualifications: 'Board Certified in Cardiology\nFellow of American College of Cardiology\nCertified in Advanced Cardiac Life Support',
-    profileImage: ''
+
+  // Load profile data from localStorage or use mock data
+  const [profile, setProfile] = useState(() => {
+    const savedProfile = localStorage.getItem("doctorProfile");
+    return savedProfile
+      ? JSON.parse(savedProfile)
+      : {
+          fullName: user?.name || "Dr. John Smith",
+          email: user?.email || "doctor@example.com",
+          age: "45",
+          gender: "male",
+          specialty: "Cardiology",
+          degree: "MD, MBBS",
+          yearsOfPractice: "15",
+          hospital: "Central Hospital",
+          bio: "Experienced cardiologist specialized in interventional procedures with a focus on preventative cardiac care and lifestyle modifications.",
+          qualifications:
+            "Board Certified in Cardiology\nFellow of American College of Cardiology\nCertified in Advanced Cardiac Life Support",
+          profileImage: "",
+        };
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setProfile({
       ...profile,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setProfile({
       ...profile,
-      [name]: value
+      [name]: value,
     });
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile((prevProfile) => ({
+          ...prevProfile,
+          profileImage: reader.result as string,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Simulate API call and save to localStorage
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      localStorage.setItem("doctorProfile", JSON.stringify(profile));
+
+      // Update AuthContext user with new name
+      updateUser({ name: profile.fullName });
+
       toast({
         title: "Profile Updated",
         description: "Your profile information has been saved successfully.",
@@ -76,19 +123,23 @@ const DoctorProfile = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={handleProfileUpdate} // Attach the handler here
+            disabled={isSubmitting} // Disable during submission
+          >
             <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </div>
-        
+
         <Tabs defaultValue="general" className="w-full">
           <TabsList>
             <TabsTrigger value="general">General Information</TabsTrigger>
             <TabsTrigger value="professional">Professional Details</TabsTrigger>
             <TabsTrigger value="security">Security & Privacy</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="general" className="space-y-6 mt-6">
             {/* Profile Card */}
             <Card>
@@ -103,18 +154,40 @@ const DoctorProfile = () => {
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex flex-col items-center space-y-4 md:w-1/4">
                       <Avatar className="w-32 h-32">
-                        <AvatarImage src={profile.profileImage || undefined} alt={profile.fullName} />
+                        <AvatarImage
+                          src={profile.profileImage || undefined}
+                          alt={profile.fullName}
+                        />
                         <AvatarFallback className="text-2xl bg-blue-100 text-blue-600">
-                          {profile.fullName.split(' ').map(n => n[0]).join('')}
+                          {profile.fullName
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
-                      
-                      <Button variant="outline" size="sm" className="w-full">
-                        <UploadCloud className="mr-2 h-4 w-4" />
-                        Upload Photo
-                      </Button>
+
+                      <Label
+                        htmlFor="profile-image-upload"
+                        className="w-full cursor-pointer"
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full pointer-events-none"
+                        >
+                          <UploadCloud className="mr-2 h-4 w-4" />
+                          Upload Photo
+                        </Button>
+                        <Input
+                          id="profile-image-upload"
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                        />
+                      </Label>
                     </div>
-                    
+
                     <div className="space-y-4 md:w-3/4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -150,7 +223,7 @@ const DoctorProfile = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="age">Age</Label>
@@ -169,9 +242,11 @@ const DoctorProfile = () => {
 
                         <div className="space-y-2">
                           <Label>Gender</Label>
-                          <Select 
-                            value={profile.gender} 
-                            onValueChange={(value) => handleSelectChange('gender', value)}
+                          <Select
+                            value={profile.gender}
+                            onValueChange={(value) =>
+                              handleSelectChange("gender", value)
+                            }
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select gender" />
@@ -180,12 +255,14 @@ const DoctorProfile = () => {
                               <SelectItem value="male">Male</SelectItem>
                               <SelectItem value="female">Female</SelectItem>
                               <SelectItem value="other">Other</SelectItem>
-                              <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                              <SelectItem value="prefer-not-to-say">
+                                Prefer not to say
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="bio">Professional Bio</Label>
                         <Textarea
@@ -203,7 +280,7 @@ const DoctorProfile = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="professional" className="space-y-6 mt-6">
             {/* Professional Details */}
             <Card>
@@ -217,9 +294,11 @@ const DoctorProfile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="specialty">Specialty</Label>
-                    <Select 
-                      value={profile.specialty} 
-                      onValueChange={(value) => handleSelectChange('specialty', value)}
+                    <Select
+                      value={profile.specialty}
+                      onValueChange={(value) =>
+                        handleSelectChange("specialty", value)
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select your specialty" />
@@ -227,10 +306,16 @@ const DoctorProfile = () => {
                       <SelectContent>
                         <SelectItem value="Cardiology">Cardiology</SelectItem>
                         <SelectItem value="Dermatology">Dermatology</SelectItem>
-                        <SelectItem value="Family Medicine">Family Medicine</SelectItem>
-                        <SelectItem value="Internal Medicine">Internal Medicine</SelectItem>
+                        <SelectItem value="Family Medicine">
+                          Family Medicine
+                        </SelectItem>
+                        <SelectItem value="Internal Medicine">
+                          Internal Medicine
+                        </SelectItem>
                         <SelectItem value="Neurology">Neurology</SelectItem>
-                        <SelectItem value="Obstetrics">Obstetrics & Gynecology</SelectItem>
+                        <SelectItem value="Obstetrics">
+                          Obstetrics & Gynecology
+                        </SelectItem>
                         <SelectItem value="Pediatrics">Pediatrics</SelectItem>
                         <SelectItem value="Psychiatry">Psychiatry</SelectItem>
                         <SelectItem value="Surgery">Surgery</SelectItem>
@@ -238,7 +323,7 @@ const DoctorProfile = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="yearsOfPractice">Years of Practice</Label>
                     <Input
@@ -252,7 +337,7 @@ const DoctorProfile = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="degree">Medical Degree</Label>
@@ -268,7 +353,7 @@ const DoctorProfile = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="hospital">Primary Hospital/Clinic</Label>
                     <div className="relative">
@@ -284,9 +369,11 @@ const DoctorProfile = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="qualifications">Professional Qualifications & Certifications</Label>
+                  <Label htmlFor="qualifications">
+                    Professional Qualifications & Certifications
+                  </Label>
                   <Textarea
                     id="qualifications"
                     name="qualifications"
@@ -299,7 +386,7 @@ const DoctorProfile = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="security" className="space-y-6 mt-6">
             {/* Security Settings */}
             <Card>
@@ -318,7 +405,7 @@ const DoctorProfile = () => {
                     placeholder="Enter your current password"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">New Password</Label>
@@ -328,9 +415,11 @@ const DoctorProfile = () => {
                       placeholder="Enter new password"
                     />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Label htmlFor="confirmPassword">
+                      Confirm New Password
+                    </Label>
                     <Input
                       id="confirmPassword"
                       type="password"
@@ -346,7 +435,7 @@ const DoctorProfile = () => {
                 </Button>
               </CardFooter>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Account Verification</CardTitle>
@@ -357,10 +446,13 @@ const DoctorProfile = () => {
               <CardContent>
                 <div className="flex items-center space-x-2 text-green-600">
                   <CheckCheck className="h-5 w-5" />
-                  <span className="font-medium">Your account is verified and active</span>
+                  <span className="font-medium">
+                    Your account is verified and active
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
-                  Your medical credentials have been verified by our administrative team.
+                  Your medical credentials have been verified by our
+                  administrative team.
                 </p>
               </CardContent>
             </Card>

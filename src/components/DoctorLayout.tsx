@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Import Avatar components
 
 interface DoctorLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,36 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | undefined>(
+    undefined
+  );
+
+  // Load profile image from localStorage on mount
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("doctorProfile");
+    if (savedProfile) {
+      const parsedProfile = JSON.parse(savedProfile);
+      setProfileImage(parsedProfile.profileImage || undefined);
+    }
+  }, []); // No dependency on user?.name here, as name comes from AuthContext
+
+  // Listen for changes in localStorage to update profile image dynamically
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedProfile = localStorage.getItem("doctorProfile");
+      if (savedProfile) {
+        const parsedProfile = JSON.parse(savedProfile);
+        setProfileImage(parsedProfile.profileImage || undefined);
+      } else {
+        setProfileImage(undefined);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []); // No dependency on user?.name here
 
   const handleLogout = () => {
     logout();
@@ -90,11 +121,21 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
             className="flex items-center cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition-colors w-full mb-2"
             onClick={() => setIsSidebarOpen(false)}
           >
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <User className="h-6 w-6 text-blue-600" />
-            </div>
+            <Avatar className="w-10 h-10">
+              <AvatarImage src={profileImage} alt={user?.name || "Doctor"} />
+              <AvatarFallback className="bg-blue-100 text-blue-600 text-sm">
+                {user?.name
+                  ? user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                  : "DR"}
+              </AvatarFallback>
+            </Avatar>
             <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+              <p className="text-sm font-medium text-gray-900">
+                {user?.name || "Doctor"}
+              </p>
             </div>
           </Link>
           <Button
