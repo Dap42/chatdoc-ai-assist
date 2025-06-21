@@ -15,6 +15,7 @@ import DoctorProfile from "./pages/DoctorProfile";
 import ChatInterface from "./pages/ChatInterface";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSignup from "./pages/AdminSignup"; // Import AdminSignup
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,7 +32,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/doctor-signup" element={<DoctorSignup />} />
             <Route path="/admin-login" element={<AdminLogin />} />
-
+            <Route path="/admin-signup" element={<AdminSignup />} />{" "}
+            {/* Add AdminSignup route */}
             {/* Protected Doctor Routes */}
             <Route
               path="/doctor-dashboard"
@@ -57,7 +59,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
             {/* Protected Admin Routes */}
             <Route
               path="/admin-dashboard"
@@ -67,7 +68,6 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

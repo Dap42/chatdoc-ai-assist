@@ -18,7 +18,7 @@ interface ChatSession {
   id: string;
   patientName: string;
   lastMessage: string;
-  time: string;
+  time: Date;
 }
 
 const ChatInterface = () => {
@@ -42,16 +42,36 @@ const ChatInterface = () => {
     if (storedRecentChats) {
       let parsedChats: ChatSession[] = JSON.parse(storedRecentChats);
 
+      // Convert time strings to Date objects for all chats
+      const chatsWithDateObjects = parsedChats.map((chat) => {
+        const chatTime =
+          typeof chat.time === "string" && !isNaN(new Date(chat.time).getTime())
+            ? new Date(chat.time)
+            : new Date(); // Fallback to current date if invalid or not a string
+        return { ...chat, time: chatTime };
+      });
+
       // Update existing "New Patient" names to "New Consultation"
-      const updatedChats = parsedChats.map((chat) => {
+      const updatedChats = chatsWithDateObjects.map((chat) => {
         if (chat.patientName.startsWith("New Patient")) {
           const patientNumber = chat.patientName.split(" ")[2];
-          return { ...chat, patientName: `New Consultation ${patientNumber}` };
+          return {
+            ...chat,
+            patientName: `New Consultation ${patientNumber}`,
+          };
         }
         return chat;
       });
       setRecentChats(updatedChats);
-      localStorage.setItem("recentChats", JSON.stringify(updatedChats)); // Persist the updated names
+      localStorage.setItem(
+        "recentChats",
+        JSON.stringify(
+          updatedChats.map((chat) => ({
+            ...chat,
+            time: chat.time.toISOString(),
+          }))
+        )
+      ); // Persist the updated names
     }
   }, []);
 
@@ -106,10 +126,18 @@ const ChatInterface = () => {
         id: newChatId,
         patientName: `New Consultation ${recentChats.length + 1}`,
         lastMessage: "No messages yet",
-        time: "Just now",
+        time: new Date(),
       };
       const updatedChats = [newChat, ...recentChats];
-      localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+      localStorage.setItem(
+        "recentChats",
+        JSON.stringify(
+          updatedChats.map((chat) => ({
+            ...chat,
+            time: chat.time.toISOString(),
+          }))
+        )
+      );
       setRecentChats(updatedChats); // Update state immediately
       navigate(`/chat/${newChatId}`, { replace: true });
     }
@@ -164,10 +192,22 @@ const ChatInterface = () => {
     setRecentChats((prevChats) => {
       const updatedChats = prevChats.map((chat) =>
         chat.id === chatId
-          ? { ...chat, lastMessage: newMessage.content, time: "Just now" }
+          ? {
+              ...chat,
+              lastMessage: newMessage.content,
+              time: new Date(),
+            }
           : chat
       );
-      localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+      localStorage.setItem(
+        "recentChats",
+        JSON.stringify(
+          updatedChats.map((chat) => ({
+            ...chat,
+            time: chat.time.toISOString(),
+          }))
+        )
+      );
       return updatedChats;
     });
 
@@ -210,12 +250,17 @@ const ChatInterface = () => {
       id: newChatId,
       patientName: `New Consultation ${recentChats.length + 1}`,
       lastMessage: "No messages yet",
-      time: "Just now",
+      time: new Date(),
     };
 
     const updatedChats = [newChat, ...recentChats];
     setRecentChats(updatedChats);
-    localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+    localStorage.setItem(
+      "recentChats",
+      JSON.stringify(
+        updatedChats.map((chat) => ({ ...chat, time: chat.time.toISOString() }))
+      )
+    );
     navigate(`/chat/${newChatId}`);
   };
 
@@ -230,7 +275,12 @@ const ChatInterface = () => {
       (chat) => !selectedChats.includes(chat.id)
     );
     setRecentChats(updatedChats);
-    localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+    localStorage.setItem(
+      "recentChats",
+      JSON.stringify(
+        updatedChats.map((chat) => ({ ...chat, time: chat.time.toISOString() }))
+      )
+    );
 
     selectedChats.forEach((chatIdToDelete) => {
       localStorage.removeItem(`chat-${chatIdToDelete}-messages`);
@@ -260,7 +310,15 @@ const ChatInterface = () => {
               }
             : chat
         );
-        localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+        localStorage.setItem(
+          "recentChats",
+          JSON.stringify(
+            updatedChats.map((chat) => ({
+              ...chat,
+              time: chat.time.toISOString(),
+            }))
+          )
+        );
         return updatedChats;
       });
     }
@@ -293,8 +351,7 @@ const ChatInterface = () => {
                 onClick={() => navigate("/doctor-dashboard")}
                 className="hover:bg-gray-100"
               >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
+                <ArrowLeft className="h-4 w-4" />
               </Button>
               <h1 className="text-lg font-semibold text-gray-900">
                 {currentChatTitle}

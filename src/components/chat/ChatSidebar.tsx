@@ -6,18 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   MessageCircle,
-  ChevronsLeft,
-  ChevronsRight,
   Search,
   Trash2,
   Plus,
+  PanelLeft,
+  PanelRight,
+  Stethoscope,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+
+import { formatTimestamp } from "@/lib/utils";
 
 interface ChatSession {
   id: string;
   patientName: string;
   lastMessage: string;
-  time: string;
+  time: Date;
 }
 
 interface ChatSidebarProps {
@@ -76,31 +80,41 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         isSidebarCollapsed ? "w-16" : "w-80"
       } flex flex-col bg-white shadow-xl border-r border-gray-200 transition-all duration-300 ease-in-out`}
     >
-      <div className="p-4 space-y-4 h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      <div className="p-4 h-full flex flex-col">
+        {/* Logo and Collapse Button */}
+        <div className="flex items-center justify-between mb-6">
           {!isSidebarCollapsed && (
-            <Button
-              variant="default"
-              className="flex-1 justify-center mr-2 bg-blue-600 hover:bg-blue-700 text-white font-medium"
-              onClick={onNewChat}
-            >
-              <Plus className="mr-2 h-4 w-4" /> New Chat
-            </Button>
+            <Link to="/" className="flex items-center space-x-2">
+              <Stethoscope className="h-8 w-8 text-blue-600" />
+              <span className="text-xl font-bold text-gray-900">Doctor AI</span>
+            </Link>
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="flex-shrink-0 hover:bg-gray-100"
+            className={`flex-shrink-0 hover:bg-gray-100 ${
+              !isSidebarCollapsed && "ml-auto"
+            }`}
           >
             {isSidebarCollapsed ? (
-              <ChevronsRight className="h-4 w-4" />
+              <PanelRight className="h-4 w-4" />
             ) : (
-              <ChevronsLeft className="h-4 w-4" />
+              <PanelLeft className="h-4 w-4" />
             )}
           </Button>
         </div>
+
+        {/* New Chat Button */}
+        {!isSidebarCollapsed && (
+          <Button
+            variant="default"
+            className="w-full justify-center mb-4 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+            onClick={onNewChat}
+          >
+            <Plus className="mr-2 h-4 w-4" /> New Chat
+          </Button>
+        )}
 
         {!isSidebarCollapsed && (
           <>
@@ -117,7 +131,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
             {/* Chats List */}
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-4 mt-4">
                 <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
                   Recent Consultations
                 </h3>
@@ -199,7 +213,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                             {chat.lastMessage}
                           </p>
                           <p className="text-xs text-gray-400 mt-1">
-                            {chat.time}
+                            {formatTimestamp(chat.time)}
                           </p>
                         </div>
                       </div>

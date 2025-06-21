@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
@@ -27,31 +26,29 @@ const ChatInput: React.FC<ChatInputProps> = ({
   }, [message]);
 
   return (
-    <div className="border-t bg-white p-4">
-      <div className="w-full max-w-3xl mx-auto bg-white border-2 border-gray-300 rounded-xl shadow-lg flex items-center">
-        <textarea
-          ref={textareaRef}
-          placeholder="Ask anything..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={onKeyPress}
-          className="flex-1 bg-white text-gray-900 placeholder-gray-500 px-6 py-4 min-h-[60px] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none text-base border-none rounded-xl"
-          rows={1}
-          style={{ 
-            overflowY: "hidden",
-            fontWeight: "500"
-          }}
-        />
-        <div className="flex items-center pr-3">
-          <Button
-            onClick={onSendMessage}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-md"
-            size="icon"
-            disabled={!message.trim()}
-          >
-            <Send className="h-5 w-5" />
-          </Button>
-        </div>
+    <div className="w-full max-w-3xl mx-auto bg-white border-2 border-gray-300 rounded-xl flex items-center">
+      <textarea
+        ref={textareaRef}
+        placeholder="Ask anything..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={onKeyPress}
+        className="flex-1 bg-white text-gray-900 placeholder-gray-500 px-6 py-4 min-h-[60px] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 resize-none text-base border-none rounded-xl"
+        rows={1}
+        style={{
+          overflowY: "hidden",
+          fontWeight: "500",
+        }}
+      />
+      <div className="flex items-center pr-3">
+        <Button
+          onClick={onSendMessage}
+          className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-md"
+          size="icon"
+          disabled={!message.trim()}
+        >
+          <Send className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

@@ -18,32 +18,45 @@ interface DoctorLayoutProps {
 }
 
 const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | undefined>(
-    undefined
-  );
+  const [profileData, setProfileData] = useState({
+    fullName: user?.name || "Doctor",
+    profileImage: undefined as string | undefined,
+  });
 
-  // Load profile image from localStorage on mount
+  // Load profile data from localStorage on mount
   useEffect(() => {
     const savedProfile = localStorage.getItem("doctorProfile");
     if (savedProfile) {
       const parsedProfile = JSON.parse(savedProfile);
-      setProfileImage(parsedProfile.profileImage || undefined);
+      setProfileData({
+        fullName: parsedProfile.fullName || user?.name || "Doctor",
+        profileImage: parsedProfile.profileImage || undefined,
+      });
+      updateUser({ name: parsedProfile.fullName }); // Update AuthContext with saved name
     }
-  }, []); // No dependency on user?.name here, as name comes from AuthContext
+  }, [user?.name, updateUser]);
 
-  // Listen for changes in localStorage to update profile image dynamically
+  // Listen for changes in localStorage to update profile data dynamically
   useEffect(() => {
     const handleStorageChange = () => {
       const savedProfile = localStorage.getItem("doctorProfile");
       if (savedProfile) {
         const parsedProfile = JSON.parse(savedProfile);
-        setProfileImage(parsedProfile.profileImage || undefined);
+        setProfileData({
+          fullName: parsedProfile.fullName || user?.name || "Doctor",
+          profileImage: parsedProfile.profileImage || undefined,
+        });
+        updateUser({ name: parsedProfile.fullName }); // Update AuthContext with saved name
       } else {
-        setProfileImage(undefined);
+        setProfileData({
+          fullName: user?.name || "Doctor",
+          profileImage: undefined,
+        });
+        updateUser({ name: user?.name || "Doctor" });
       }
     };
 
@@ -51,7 +64,7 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, []); // No dependency on user?.name here
+  }, [user?.name, updateUser]);
 
   const handleLogout = () => {
     logout();
@@ -122,19 +135,24 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
             onClick={() => setIsSidebarOpen(false)}
           >
             <Avatar className="w-10 h-10">
-              <AvatarImage src={profileImage} alt={user?.name || "Doctor"} />
+              <AvatarImage
+                src={profileData.profileImage}
+                alt={profileData.fullName}
+              />
               <AvatarFallback className="bg-blue-100 text-blue-600 text-sm">
-                {user?.name
-                  ? user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                  : "DR"}
+                {profileData.fullName
+                  .split(" ")
+                  .filter(
+                    (n, index) => !(index === 0 && n.toLowerCase() === "dr.")
+                  )
+                  .map((n) => n[0])
+                  .join("")
+                  .replace(/D/g, "")}
               </AvatarFallback>
             </Avatar>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-900">
-                {user?.name || "Doctor"}
+                {profileData.fullName}
               </p>
             </div>
           </Link>

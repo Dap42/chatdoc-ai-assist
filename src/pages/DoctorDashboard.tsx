@@ -23,26 +23,36 @@ import { useAuth } from "../contexts/AuthContext";
 import DoctorLayout from "../components/DoctorLayout";
 import { useState, useEffect } from "react";
 
+import { formatTimestamp } from "@/lib/utils";
+
 interface ChatSession {
   id: string;
   patientName: string;
   lastMessage: string;
-  time: string;
-  status: "active" | "completed" | "pending";
+  time: Date;
 }
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [recentChats, setRecentChats] = useState<ChatSession[]>([]);
-  const [selectedChats, setSelectedChats] = useState<string[]>([]); // New state for selected chats
 
   // Effect to load recent chats from localStorage and keep them updated
   useEffect(() => {
     const loadRecentChats = () => {
       const storedChats = localStorage.getItem("recentChats");
       if (storedChats) {
-        setRecentChats(JSON.parse(storedChats));
+        const parsedChats: ChatSession[] = JSON.parse(storedChats).map(
+          (chat: any) => {
+            const chatTime =
+              typeof chat.time === "string" &&
+              !isNaN(new Date(chat.time).getTime())
+                ? new Date(chat.time)
+                : new Date(); // Fallback to current date if invalid or not a string
+            return { ...chat, time: chatTime };
+          }
+        );
+        setRecentChats(parsedChats);
       } else {
         setRecentChats([]); // Initialize as empty if nothing in storage
       }
@@ -64,56 +74,18 @@ const DoctorDashboard = () => {
       id: newChatId,
       patientName: `New Patient ${recentChats.length + 1}`,
       lastMessage: "No messages yet",
-      time: "Just now",
-      status: "active",
+      time: new Date(),
     };
 
     const updatedChats = [newChat, ...recentChats];
     setRecentChats(updatedChats);
-    localStorage.setItem("recentChats", JSON.stringify(updatedChats));
+    localStorage.setItem(
+      "recentChats",
+      JSON.stringify(
+        updatedChats.map((chat) => ({ ...chat, time: chat.time.toISOString() }))
+      )
+    );
     navigate(`/chat/${newChatId}`);
-  };
-
-  const handleSelectAllChats = (isChecked: boolean) => {
-    if (isChecked) {
-      const allChatIds = recentChats.map((chat) => chat.id);
-      setSelectedChats(allChatIds);
-    } else {
-      setSelectedChats([]);
-    }
-  };
-
-  const handleSelectChat = (chatId: string, isChecked: boolean) => {
-    setSelectedChats((prevSelected) =>
-      isChecked
-        ? [...prevSelected, chatId]
-        : prevSelected.filter((id) => id !== chatId)
-    );
-  };
-
-  const handleDeleteSelectedChats = () => {
-    if (selectedChats.length === 0) return;
-
-    // Remove selected chats from recentChats
-    const updatedChats = recentChats.filter(
-      (chat) => !selectedChats.includes(chat.id)
-    );
-    setRecentChats(updatedChats);
-    localStorage.setItem("recentChats", JSON.stringify(updatedChats));
-
-    // Remove associated messages from localStorage for each selected chat
-    selectedChats.forEach((chatId) => {
-      localStorage.removeItem(`chat-${chatId}-messages`);
-    });
-
-    // Clear selection
-    setSelectedChats([]);
-
-    // If any deleted chat was the currently viewed one, navigate to dashboard
-    const currentPathChatId = window.location.pathname.split("/").pop();
-    if (currentPathChatId && selectedChats.includes(currentPathChatId)) {
-      navigate("/doctor-dashboard");
-    }
   };
 
   // Mock data - replace with real API calls
@@ -167,40 +139,7 @@ const DoctorDashboard = () => {
         {/* Recent Chats */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="flex items-center space-x-2">
-              <CardTitle className="text-2xl font-bold">Recent Chats</CardTitle>
-              {recentChats.length > 0 && (
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="select-all-chats"
-                    checked={
-                      selectedChats.length === recentChats.length &&
-                      recentChats.length > 0
-                    }
-                    onCheckedChange={(isChecked: boolean) =>
-                      handleSelectAllChats(isChecked)
-                    }
-                  />
-                  <label
-                    htmlFor="select-all-chats"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Select All
-                  </label>
-                </div>
-              )}
-            </div>
-            {selectedChats.length > 0 && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDeleteSelectedChats}
-                className="ml-auto"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Selected ({selectedChats.length})
-              </Button>
-            )}
+            <CardTitle className="text-2xl font-bold">Recent Chats</CardTitle>
           </CardHeader>
           <CardDescription className="px-6 pb-4">
             Your most recent patient consultations
@@ -211,46 +150,23 @@ const DoctorDashboard = () => {
             ) : (
               <div className="space-y-4">
                 {recentChats.map((chat) => (
-                  <div
+                  <Link
                     key={chat.id}
+                    to={`/chat/${chat.id}`}
                     className="flex items-center p-3 border rounded-md hover:bg-gray-50"
                   >
-                    <Checkbox
-                      id={`checkbox-${chat.id}`}
-                      checked={selectedChats.includes(chat.id)}
-                      onCheckedChange={(isChecked: boolean) =>
-                        handleSelectChat(chat.id, isChecked)
-                      }
-                      className="mr-4"
-                    />
-                    <Link
-                      to={`/chat/${chat.id}`}
-                      className="flex-1 flex items-center justify-between"
-                    >
-                      <div>
-                        <p className="font-medium">{chat.patientName}</p>
-                        <p className="text-sm text-gray-500">
-                          {chat.lastMessage}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge
-                          variant={
-                            chat.status === "active"
-                              ? "default"
-                              : chat.status === "completed"
-                              ? "secondary"
-                              : "outline"
-                          }
-                        >
-                          {chat.status}
-                        </Badge>
-                        <span className="text-sm text-gray-400">
-                          {chat.time}
-                        </span>
-                      </div>
-                    </Link>
-                  </div>
+                    <div>
+                      <p className="font-medium">{chat.patientName}</p>
+                      <p className="text-sm text-gray-500">
+                        {chat.lastMessage}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2 ml-auto">
+                      <span className="text-sm text-gray-400">
+                        {formatTimestamp(chat.time)}
+                      </span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             )}

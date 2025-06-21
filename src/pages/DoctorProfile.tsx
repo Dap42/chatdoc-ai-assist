@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,23 +41,32 @@ const DoctorProfile = () => {
   // Load profile data from localStorage or use mock data
   const [profile, setProfile] = useState(() => {
     const savedProfile = localStorage.getItem("doctorProfile");
-    return savedProfile
-      ? JSON.parse(savedProfile)
-      : {
-          fullName: user?.name || "Dr. John Smith",
-          email: user?.email || "doctor@example.com",
-          age: "45",
-          gender: "male",
-          specialty: "Cardiology",
-          degree: "MD, MBBS",
-          yearsOfPractice: "15",
-          hospital: "Central Hospital",
-          bio: "Experienced cardiologist specialized in interventional procedures with a focus on preventative cardiac care and lifestyle modifications.",
-          qualifications:
-            "Board Certified in Cardiology\nFellow of American College of Cardiology\nCertified in Advanced Cardiac Life Support",
-          profileImage: "",
-        };
+    if (savedProfile) {
+      return JSON.parse(savedProfile);
+    }
+    return {
+      fullName: user?.name || "Dr. John Smith",
+      email: user?.email || "doctor@example.com",
+      age: "45",
+      gender: "male",
+      specialty: "Cardiology",
+      degree: "MD, MBBS",
+      yearsOfPractice: "15",
+      hospital: "Central Hospital",
+      bio: "Experienced cardiologist specialized in interventional procedures with a focus on preventative cardiac care and lifestyle modifications.",
+      qualifications:
+        "Board Certified in Cardiology\nFellow of American College of Cardiology\nCertified in Advanced Cardiac Life Support",
+      profileImage: "",
+    };
   });
+
+  // Load profile data from localStorage on mount
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("doctorProfile");
+    if (savedProfile) {
+      setProfile(JSON.parse(savedProfile));
+    }
+  }, []);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -161,31 +170,51 @@ const DoctorProfile = () => {
                         <AvatarFallback className="text-2xl bg-blue-100 text-blue-600">
                           {profile.fullName
                             .split(" ")
+                            .filter(
+                              (n, index) =>
+                                !(index === 0 && n.toLowerCase() === "dr.")
+                            )
                             .map((n) => n[0])
-                            .join("")}
+                            .join("")
+                            .replace(/D/g, "")}
                         </AvatarFallback>
                       </Avatar>
 
-                      <Label
-                        htmlFor="profile-image-upload"
-                        className="w-full cursor-pointer"
-                      >
+                      <div className="flex flex-col space-y-2 w-full">
+                        <Label
+                          htmlFor="profile-image-upload"
+                          className="w-full cursor-pointer"
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full pointer-events-none"
+                          >
+                            <UploadCloud className="mr-2 h-4 w-4" />
+                            Upload Photo
+                          </Button>
+                          <Input
+                            id="profile-image-upload"
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                          />
+                        </Label>
                         <Button
                           variant="outline"
                           size="sm"
-                          className="w-full pointer-events-none"
+                          className="w-full"
+                          onClick={() =>
+                            setProfile((prevProfile) => ({
+                              ...prevProfile,
+                              profileImage: "",
+                            }))
+                          }
                         >
-                          <UploadCloud className="mr-2 h-4 w-4" />
-                          Upload Photo
+                          Remove Photo
                         </Button>
-                        <Input
-                          id="profile-image-upload"
-                          type="file"
-                          className="hidden"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                        />
-                      </Label>
+                      </div>
                     </div>
 
                     <div className="space-y-4 md:w-3/4">

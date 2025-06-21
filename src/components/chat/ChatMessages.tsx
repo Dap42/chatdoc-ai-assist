@@ -1,6 +1,6 @@
-
 import React from "react";
 import { Bot, User } from "lucide-react";
+import { formatTimestamp } from "@/lib/utils";
 
 interface Message {
   id: string;
@@ -14,7 +14,10 @@ interface ChatMessagesProps {
   messagesEndRef: React.RefObject<HTMLDivElement>;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({
+  messages,
+  messagesEndRef,
+}) => {
   if (messages.length === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 max-w-2xl mx-auto">
@@ -23,12 +26,12 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
           Start Your Medical Consultation
         </p>
         <p className="text-base mt-1 text-gray-600">
-          Ask questions about patient cases, symptoms, treatment
-          protocols, or medical procedures.
+          Ask questions about patient cases, symptoms, treatment protocols, or
+          medical procedures.
         </p>
         <div className="mt-6 p-4 bg-blue-50 rounded-lg text-gray-700 text-sm border border-blue-200">
-          Example: "I have a patient with acute chest pain and elevated
-          troponin levels. What's the recommended treatment protocol?"
+          Example: "I have a patient with acute chest pain and elevated troponin
+          levels. What's the recommended treatment protocol?"
         </div>
       </div>
     );
@@ -70,12 +73,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, messagesEndRef })
                     : "bg-white text-gray-800 border border-gray-200"
                 }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-              <p className={`text-xs mt-2 opacity-70 ${msg.sender === "doctor" ? "text-left" : "text-right"}`}>
-                {msg.timestamp.toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {msg.content}
+              </p>
+              <p
+                className={`text-xs mt-2 opacity-70 ${
+                  msg.sender === "doctor" ? "text-left" : "text-right"
+                }`}
+              >
+                {formatTimestamp(msg.timestamp)}
               </p>
             </div>
           </div>
