@@ -2,8 +2,10 @@ from flask import Flask, request, jsonify
 import os
 import json
 from document_assistant import DocumentAssistant
+from flask_cors import CORS # Import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}) # Configure CORS for /api routes
 
 # Initialize the DocumentAssistant
 assistant = DocumentAssistant()

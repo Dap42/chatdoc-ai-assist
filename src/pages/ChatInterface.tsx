@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/AuthContext";
 import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatMessages from "../components/chat/ChatMessages";
 import ChatInput from "../components/chat/ChatInput";
+import { useToast } from "@/components/ui/use-toast"; // Import useToast
 
 interface Message {
   id: string;
@@ -29,12 +30,14 @@ const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [recentChats, setRecentChats] = useState<ChatSession[]>([]);
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
+  const { toast } = useToast(); // Initialize toast
   const [currentChatTitle, setCurrentChatTitle] = useState(
     "Medical Consultation"
   );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // New loading state
 
   // Load recent chats from localStorage on component mount and update old names
   useEffect(() => {
@@ -211,30 +214,58 @@ const ChatInterface = () => {
       return updatedChats;
     });
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: `ai-${Date.now()}`,
-        content: `Thank you for your message. I understand you mentioned: "${newMessage.content}". How can I assist you further with this medical consultation?`,
-        sender: "ai",
-        timestamp: new Date(),
-      };
-
-      console.log("Adding AI response:", aiResponse);
-
-      setMessages((prevMessages) => {
-        const updatedMessages = [...prevMessages, aiResponse];
-        console.log("Messages after AI response:", updatedMessages);
-        // Save messages again after AI response
-        if (chatId) {
-          localStorage.setItem(
-            `chat-${chatId}-messages`,
-            JSON.stringify(updatedMessages)
-          );
+    // Make API call to backend
+    setIsLoading(true); // Set loading to true
+    fetch("http://localhost:8000/api/search", { // Use the correct backend URL and port
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question: newMessage.content }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return updatedMessages;
+        return response.json();
+      })
+      .then((data) => {
+        const aiResponse: Message = {
+          id: `ai-${Date.now()}`,
+          content: data.answer || "No answer found.",
+          sender: "ai",
+          timestamp: new Date(),
+        };
+
+        setMessages((prevMessages) => {
+          const updatedMessages = [...prevMessages, aiResponse];
+          if (chatId) {
+            localStorage.setItem(
+              `chat-${chatId}-messages`,
+              JSON.stringify(updatedMessages)
+            );
+          }
+          return updatedMessages;
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching AI response:", error);
+        toast({
+          title: "Error",
+          description: "Failed to get AI response. Please try again.",
+          variant: "destructive",
+        });
+        const errorResponse: Message = {
+          id: `ai-error-${Date.now()}`,
+          content: "I'm sorry, I couldn't get a response. Please try again.",
+          sender: "ai",
+          timestamp: new Date(),
+        };
+        setMessages((prevMessages) => [...prevMessages, errorResponse]);
+      })
+      .finally(() => {
+        setIsLoading(false); // Set loading to false regardless of success or failure
       });
-    }, 1000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -386,6 +417,7 @@ const ChatInterface = () => {
               setMessage={setMessage}
               onSendMessage={handleSendMessage}
               onKeyPress={handleKeyPress}
+              isLoading={isLoading} // Pass isLoading prop
             />
           </div>
         </div>

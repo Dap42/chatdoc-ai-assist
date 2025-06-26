@@ -7,6 +7,7 @@ interface ChatInputProps {
   setMessage: (message: string) => void;
   onSendMessage: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
+  isLoading: boolean; // Add isLoading prop
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -14,6 +15,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   setMessage,
   onSendMessage,
   onKeyPress,
+  isLoading, // Destructure isLoading
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -45,7 +47,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           onClick={onSendMessage}
           className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-md"
           size="icon"
-          disabled={!message.trim()}
+          disabled={!message.trim() || isLoading} // Disable when loading
         >
           <Send className="h-5 w-5" />
         </Button>

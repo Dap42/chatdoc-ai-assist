@@ -1,0 +1,8 @@
+flask
+flask-cors
+pandas
+snowflake-snowpark-python
+snowflake-core
+snowflake-connector-python
+sqlalchemy
+snowflake-sqlalchemy

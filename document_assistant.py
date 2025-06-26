@@ -7,19 +7,19 @@ from snowflake.snowpark import Session
 
 # Snowflake connection parameters
 CONNECTION_PARAMETERS = {
-    "account": "of68662.ap-south-1.aws",
-    "user": "Analytx4tlab",
-    "password": "Analytx4tlab@Amit",
-    "role": "accountadmin",
-    "database": "tenwave_db",
-    "warehouse": "tenwave_warehouse",
-    "schema": "data",
+    "account": "NFNEHMO-HH89625",
+    "user": "DARPAN2005",
+    "password": "DarpanBansal@2005",
+    "role": "ACCOUNTADMIN",
+    "database": "CC_QUICKSTART_CORTEX_SEARCH_DOCS",
+    "warehouse": "COMPUTE_WH",
+    "schema": "INFORMATION_SCHEMA",
 }
 
 # Default configuration values
 NUM_CHUNKS = 3  # Number of chunks provided as context
-CORTEX_SEARCH_DATABASE = "TENWAVE_DB"
-CORTEX_SEARCH_SCHEMA = "DATA"
+CORTEX_SEARCH_DATABASE = "CC_QUICKSTART_CORTEX_SEARCH_DOCS"
+CORTEX_SEARCH_SCHEMA = "INFORMATION_SCHEMA"
 CORTEX_SEARCH_SERVICE = "CC_SEARCH_SERVICE_CS"
 DEFAULT_MODEL = "llama3.3-70b"  # Using llama3.3-70b
 MIN_SUGGESTED_QUESTIONS = 4  # Minimum number of suggested questions
