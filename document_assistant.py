@@ -13,13 +13,13 @@ CONNECTION_PARAMETERS = {
     "role": "ACCOUNTADMIN",
     "database": "CC_QUICKSTART_CORTEX_SEARCH_DOCS",
     "warehouse": "COMPUTE_WH",
-    "schema": "INFORMATION_SCHEMA",
+    "schema": "DATA",
 }
 
 # Default configuration values
 NUM_CHUNKS = 3  # Number of chunks provided as context
 CORTEX_SEARCH_DATABASE = "CC_QUICKSTART_CORTEX_SEARCH_DOCS"
-CORTEX_SEARCH_SCHEMA = "INFORMATION_SCHEMA"
+CORTEX_SEARCH_SCHEMA = "DATA"
 CORTEX_SEARCH_SERVICE = "CC_SEARCH_SERVICE_CS"
 DEFAULT_MODEL = "llama3.3-70b"  # Using llama3.3-70b
 MIN_SUGGESTED_QUESTIONS = 4  # Minimum number of suggested questions
