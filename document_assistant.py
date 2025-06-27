@@ -5,15 +5,15 @@ from datetime import datetime
 from snowflake.core import Root
 from snowflake.snowpark import Session
 
-# Snowflake connection parameters
+# Snowflake connection parameters (will be read from environment variables)
 CONNECTION_PARAMETERS = {
-    "account": "NFNEHMO-HH89625",
-    "user": "DARPAN2005",
-    "password": "DarpanBansal@2005",
-    "role": "ACCOUNTADMIN",
-    "database": "CC_QUICKSTART_CORTEX_SEARCH_DOCS",
-    "warehouse": "COMPUTE_WH",
-    "schema": "DATA",
+    "account": os.environ.get("SNOWFLAKE_ACCOUNT"),
+    "user": os.environ.get("SNOWFLAKE_USER"),
+    "password": os.environ.get("SNOWFLAKE_PASSWORD"),
+    "role": os.environ.get("SNOWFLAKE_ROLE"),
+    "database": os.environ.get("SNOWFLAKE_DATABASE"),
+    "warehouse": os.environ.get("SNOWFLAKE_WAREHOUSE"),
+    "schema": os.environ.get("SNOWFLAKE_SCHEMA"),
 }
 
 # Default configuration values

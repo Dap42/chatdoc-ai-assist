@@ -195,7 +195,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2024 Doctor AI Chat. All rights reserved.</p>
+          <p>&copy; 2025 Doctor AI Chat. All rights reserved.</p>
           <p className="text-gray-400 mt-2">
             Empowering healthcare through AI-assisted communication
           </p>
