@@ -216,7 +216,7 @@ const ChatInterface = () => {
 
     // Make API call to backend
     setIsLoading(true); // Set loading to true
-    fetch("http://localhost:8000/api/search", { // Use the correct backend URL and port
+    fetch(`${import.meta.env.VITE_API_BASE_URL}/search`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
