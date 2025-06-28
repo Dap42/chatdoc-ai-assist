@@ -5,17 +5,9 @@
       "src": "src/index.html",
       "use": "@vercel/static-build",
       "config": { "distDir": "dist" }
-    },
-    {
-      "src": "main.py",
-      "use": "@vercel/python"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "main.py"
-    },
     {
       "src": "/(.*)",
       "dest": "src/index.html"
