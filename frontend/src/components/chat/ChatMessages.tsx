@@ -1,6 +1,8 @@
 import React from "react";
 import { Bot, User } from "lucide-react";
 import { formatTimestamp } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -73,9 +75,15 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                     : "bg-white text-gray-800 border border-gray-200"
                 }`}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                {msg.content}
-              </p>
+              <div className="text-sm leading-relaxed markdown-content">
+                {msg.sender === "ai" ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                ) : (
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                )}
+              </div>
               <p
                 className={`text-xs mt-2 opacity-70 ${
                   msg.sender === "doctor" ? "text-left" : "text-right"

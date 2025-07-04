@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Demo credentials validation
       const validCredentials = {
-        doctor: { email: "doctor@demo.com", password: "password123" },
+        doctor: { email: "dr.jhonsmith@gmail.com", password: "password123" },
         admin: { email: "admin@demo.com", password: "admin123" },
       };
 
