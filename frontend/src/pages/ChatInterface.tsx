@@ -36,6 +36,7 @@ const ChatInterface = () => {
   );
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null); // New ref for the scrollable container
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false); // New loading state
 
@@ -159,7 +160,15 @@ const ChatInterface = () => {
   };
 
   useEffect(() => {
-    scrollToBottom();
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      // Only scroll to bottom if user is already at the bottom or very close
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
+        // 100px buffer
+        scrollToBottom();
+      }
+    }
   }, [messages]);
 
   const handleSendMessage = () => {
@@ -216,19 +225,37 @@ const ChatInterface = () => {
 
     // Make API call to backend
     setIsLoading(true); // Set loading to true
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/search`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ question: newMessage.content }),
-    })
-      .then((response) => {
+
+    const apiBaseUrls = import.meta.env.VITE_API_BASE_URL.split(",");
+    let currentApiUrl = apiBaseUrls[0]; // Default to the first URL
+
+    const fetchWithFallback = async (urls: string[], index: number = 0) => {
+      if (index >= urls.length) {
+        throw new Error("All API endpoints failed.");
+      }
+
+      const url = urls[index];
+      try {
+        const response = await fetch(`${url}/search`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ question: newMessage.content }),
+        });
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
-      })
+      } catch (error) {
+        console.error(`Error fetching from ${url}:`, error);
+        // Try the next URL if available
+        return fetchWithFallback(urls, index + 1);
+      }
+    };
+
+    fetchWithFallback(apiBaseUrls)
       .then((data) => {
         const aiResponse: Message = {
           id: `ai-${Date.now()}`,
@@ -405,10 +432,11 @@ const ChatInterface = () => {
         {/* Messages Area */}
         <div className="flex-1 p-6 bg-gray-50 overflow-hidden">
           <div className="flex flex-col h-full">
-            <div className="flex-1 overflow-y-auto mb-4">
+            <div className="flex-1 overflow-y-auto mb-4 py-10">
               <ChatMessages
                 messages={messages}
                 messagesEndRef={messagesEndRef}
+                isLoading={isLoading} // Pass isLoading prop
               />
             </div>
 

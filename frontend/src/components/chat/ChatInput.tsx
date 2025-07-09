@@ -1,13 +1,13 @@
 import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { Send, Loader2 } from "lucide-react"; // Import Loader2 for spinning icon
 
 interface ChatInputProps {
   message: string;
   setMessage: (message: string) => void;
   onSendMessage: () => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
-  isLoading: boolean; // Add isLoading prop
+  isLoading: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -15,7 +15,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   setMessage,
   onSendMessage,
   onKeyPress,
-  isLoading, // Destructure isLoading
+  isLoading,
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -41,15 +41,20 @@ const ChatInput: React.FC<ChatInputProps> = ({
           overflowY: "hidden",
           fontWeight: "500",
         }}
+        disabled={isLoading} // Disable textarea when loading
       />
       <div className="flex items-center pr-3">
         <Button
           onClick={onSendMessage}
           className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-md"
           size="icon"
-          disabled={!message.trim() || isLoading} // Disable when loading
+          disabled={!message.trim() || isLoading}
         >
-          <Send className="h-5 w-5" />
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin" /> // Spinning icon when loading
+          ) : (
+            <Send className="h-5 w-5" /> // Send icon when not loading
+          )}
         </Button>
       </div>
     </div>

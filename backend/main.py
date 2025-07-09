@@ -11,7 +11,12 @@ load_dotenv()
 print("DEBUG: SNOWFLAKE_ACCOUNT from .env: {os.environ.get('SNOWFLAKE_ACCOUNT')}")
 logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": os.environ.get("FRONTEND_URL", "http://localhost:8080")}}) # Configure CORS for /api routes
+frontend_urls_str = os.environ.get("FRONTEND_URL", "http://localhost:8080")
+allowed_origins = [url.strip() for url in frontend_urls_str.split(',')]
+# Add the specific IP address if it's not already included
+if "http://192.168.29.128:8080" not in allowed_origins:
+    allowed_origins.append("http://192.168.29.128:8080")
+CORS(app, resources={r"/api/*": {"origins": allowed_origins}}) # Configure CORS for /api routes
 
 # Initialize the DocumentAssistant
 assistant = DocumentAssistant()

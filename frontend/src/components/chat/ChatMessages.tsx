@@ -1,5 +1,5 @@
 import React from "react";
-import { Bot, User } from "lucide-react";
+import { Bot, User, Loader2 } from "lucide-react"; // Import Loader2
 import { formatTimestamp } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -14,13 +14,16 @@ interface Message {
 interface ChatMessagesProps {
   messages: Message[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
+  isLoading: boolean; // Add isLoading prop
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   messagesEndRef,
+  isLoading, // Destructure isLoading
 }) => {
-  if (messages.length === 0) {
+  if (messages.length === 0 && !isLoading) {
+    // Only show initial message if not loading
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 max-w-2xl mx-auto">
         <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -95,6 +98,18 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           </div>
         </div>
       ))}
+      {isLoading && ( // Show spinning wheel when loading
+        <div className="flex justify-start">
+          <div className="flex items-start gap-3 max-w-[75%]">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-gray-100 text-gray-600">
+              <Bot className="h-4 w-4" />
+            </div>
+            <div className="rounded-2xl px-4 py-3 shadow-sm bg-white text-gray-800 border border-gray-200">
+              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+            </div>
+          </div>
+        </div>
+      )}
       <div ref={messagesEndRef} />
     </div>
   );
