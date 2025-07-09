@@ -171,12 +171,15 @@ const DoctorProfile = () => {
                           {profile.fullName
                             .split(" ")
                             .filter(
-                              (n, index) =>
-                                !(index === 0 && n.toLowerCase() === "dr.")
+                              (word, index) =>
+                                !(
+                                  index === 0 &&
+                                  (word.toLowerCase() === "doctor" ||
+                                    word.toLowerCase() === "dr.")
+                                )
                             )
                             .map((n) => n[0])
-                            .join("")
-                            .replace(/D/g, "")}
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
 

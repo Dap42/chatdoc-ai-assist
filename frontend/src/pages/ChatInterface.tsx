@@ -40,6 +40,25 @@ const ChatInterface = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false); // New loading state
 
+  const suggestedQuestions = [
+    "What are the common symptoms of a myocardial infarction?",
+    "How do I differentiate between viral and bacterial pneumonia?",
+    "What is the recommended dosage for amoxicillin in pediatric patients?",
+    "Can you explain the mechanism of action for ACE inhibitors?",
+    "What are the latest guidelines for managing type 2 diabetes?",
+    "How should I interpret a patient's abnormal liver function tests?",
+    "What are the potential side effects of long-term corticosteroid use?",
+  ];
+
+  const [displayedQuestions, setDisplayedQuestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    // This effect will now only clear displayed questions when messages are added
+    if (messages.length > 0) {
+      setDisplayedQuestions([]);
+    }
+  }, [messages.length]);
+
   // Load recent chats from localStorage on component mount and update old names
   useEffect(() => {
     const storedRecentChats = localStorage.getItem("recentChats");
@@ -107,7 +126,12 @@ const ChatInterface = () => {
         }));
         setMessages(parsedMessages);
       } else {
+        // No stored messages for this chat, so it's a new or empty chat
         setMessages([]);
+        const shuffled = [...suggestedQuestions].sort(
+          () => 0.5 - Math.random()
+        );
+        setDisplayedQuestions(shuffled.slice(0, 3)); // Set new random questions
       }
 
       // Update chat title based on current chat
@@ -143,6 +167,9 @@ const ChatInterface = () => {
         )
       );
       setRecentChats(updatedChats); // Update state immediately
+      setMessages([]); // Ensure messages are cleared for the new chat
+      const shuffled = [...suggestedQuestions].sort(() => 0.5 - Math.random());
+      setDisplayedQuestions(shuffled.slice(0, 3)); // Set new random questions for the brand new chat
       navigate(`/chat/${newChatId}`, { replace: true });
     }
   }, [chatId, navigate, recentChats]); // Added recentChats to dependency array for title update logic
@@ -171,12 +198,13 @@ const ChatInterface = () => {
     }
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (!message.trim() || !chatId) return;
+  const handleSendMessage = (questionContent?: string) => {
+    const contentToSend = questionContent || message.trim();
+    if (!contentToSend || !chatId) return;
 
     const newMessage: Message = {
       id: `msg-${Date.now()}`,
-      content: message.trim(),
+      content: contentToSend,
       sender: "doctor",
       timestamp: new Date(),
     };
@@ -319,6 +347,9 @@ const ChatInterface = () => {
         updatedChats.map((chat) => ({ ...chat, time: chat.time.toISOString() }))
       )
     );
+    setMessages([]); // Clear messages for the new chat
+    const shuffled = [...suggestedQuestions].sort(() => 0.5 - Math.random());
+    setDisplayedQuestions(shuffled.slice(0, 3)); // Set new random questions
     navigate(`/chat/${newChatId}`);
   };
 
@@ -437,6 +468,9 @@ const ChatInterface = () => {
                 messages={messages}
                 messagesEndRef={messagesEndRef}
                 isLoading={isLoading} // Pass isLoading prop
+                suggestedQuestions={displayedQuestions}
+                setMessage={setMessage}
+                handleSendMessage={handleSendMessage}
               />
             </div>
 

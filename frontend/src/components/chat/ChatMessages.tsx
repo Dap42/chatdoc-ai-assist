@@ -11,19 +11,31 @@ interface Message {
   timestamp: Date;
 }
 
+import { Button } from "@/components/ui/button"; // Import Button component
+
 interface ChatMessagesProps {
   messages: Message[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
-  isLoading: boolean; // Add isLoading prop
+  isLoading: boolean;
+  suggestedQuestions: string[];
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+  handleSendMessage: (questionContent?: string) => void;
 }
 
 const ChatMessages: React.FC<ChatMessagesProps> = ({
   messages,
   messagesEndRef,
-  isLoading, // Destructure isLoading
+  isLoading,
+  suggestedQuestions,
+  setMessage,
+  handleSendMessage,
 }) => {
+  const handleSuggestedQuestionClick = (question: string) => {
+    setMessage(question); // Set the message in the input field
+    handleSendMessage(question); // Immediately send the message
+  };
+
   if (messages.length === 0 && !isLoading) {
-    // Only show initial message if not loading
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-500 max-w-2xl mx-auto">
         <Bot className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -38,6 +50,20 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           Example: "I have a patient with acute chest pain and elevated troponin
           levels. What's the recommended treatment protocol?"
         </div>
+        {suggestedQuestions.length > 0 && (
+          <div className="mt-8 grid grid-cols-1 gap-3 w-full max-w-sm">
+            {suggestedQuestions.map((question, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="w-full justify-start text-left h-auto py-3 px-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 transition-colors duration-200 whitespace-normal break-words"
+                onClick={() => handleSuggestedQuestionClick(question)}
+              >
+                {question}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
