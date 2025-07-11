@@ -130,9 +130,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
             <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 bg-gray-100 text-gray-600">
               <Bot className="h-4 w-4" />
             </div>
-            <div className="rounded-2xl px-4 py-3 shadow-sm bg-white text-gray-800 border border-gray-200">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
-            </div>
+            <Loader2 className="h-6.5 w-6.5 animate-spin text-blue-500 ml-3 mt-3" />
           </div>
         </div>
       )}
