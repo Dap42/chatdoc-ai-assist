@@ -187,15 +187,7 @@ const ChatInterface = () => {
   };
 
   useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer) {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      // Only scroll to bottom if user is already at the bottom or very close
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
-        // 100px buffer
-        scrollToBottom();
-      }
-    }
+    scrollToBottom();
   }, [messages]);
 
   const handleSendMessage = (questionContent?: string) => {
