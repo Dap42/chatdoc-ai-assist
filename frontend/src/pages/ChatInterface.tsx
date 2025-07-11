@@ -41,13 +41,13 @@ const ChatInterface = () => {
   const [isLoading, setIsLoading] = useState(false); // New loading state
 
   const suggestedQuestions = [
-    "What are the common symptoms of a myocardial infarction?",
-    "How do I differentiate between viral and bacterial pneumonia?",
-    "What is the recommended dosage for amoxicillin in pediatric patients?",
-    "Can you explain the mechanism of action for ACE inhibitors?",
-    "What are the latest guidelines for managing type 2 diabetes?",
-    "How should I interpret a patient's abnormal liver function tests?",
-    "What are the potential side effects of long-term corticosteroid use?",
+    "What surgical procedure was performed on Mrs. Rupali and why was it considered urgent?",
+    "What were the diagnoses made for Baby of Sarita shortly after birth at 34 weeks of gestation?",
+    "What is the chronic condition Mr. Aayush is known to have, and what triggered his recent OPD visit?",
+    "What follow-up medication was prescribed to Baby of Anjali Ahlawat after discharge for nutritional support?",
+    "What were the indications mentioned for performing an emergency cervical cerclage on Mrs. Rupali?",
+    "What vaccination was given to Mrs. Rupali during her 26-week antenatal checkup?",
+    "Why was oxygen support continued post-extubation in Baby of Anjali Ahlawat's encephalopathy case?",
   ];
 
   const [displayedQuestions, setDisplayedQuestions] = useState<string[]>([]);
