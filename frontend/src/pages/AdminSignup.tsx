@@ -97,7 +97,7 @@ const AdminSignup = () => {
             to="/"
             className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700"
           >
-            <img src="/logo.png" alt="Logo" className="h-11 w-15" />
+            <img src="/logo.svg" alt="Logo" className="h-11 w-15" />
             <span className="text-2xl font-bold">Admin Panel</span>{" "}
           </Link>
         </div>

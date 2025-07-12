@@ -97,7 +97,7 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
         <div className="flex items-center justify-between h-16 px-6 border-b">
           {!isSidebarCollapsed && (
             <Link to="/" className="flex items-center space-x-2">
-              <img src="/logo.png" alt="Logo" className="h-11 w-15" />
+              <img src="/logo.svg" alt="Logo" className="h-11 w-15" />
               <span className="text-xl font-bold text-gray-900">
                 Doctor AI Chat
               </span>
@@ -107,7 +107,7 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
           {isSidebarCollapsed && (
             <div className="flex flex-col items-center">
               <Link to="/" className="flex items-center">
-                <img src="/logo.png" alt="Logo" className="h-11 w-15 mx-auto" />
+                <img src="/logo.svg" alt="Logo" className="h-11 w-15 mx-auto" />
               </Link>
               <Button
                 variant="ghost"

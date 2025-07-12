@@ -25,7 +25,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
-              <img src="/logo.png" alt="Logo" className="h-11 w-15" />
+              <img src="/logo.svg" alt="Logo" className="h-11 w-15" />
               <h1 className="text-2xl font-bold text-gray-900">
                 Doctor AI Chat
               </h1>

@@ -13,7 +13,7 @@ import {
   PanelRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "../../../logo.png"; // Import the logo image
+import logo from "/logo.svg"; // Import the logo image
 
 import { formatTimestamp } from "@/lib/utils";
 
