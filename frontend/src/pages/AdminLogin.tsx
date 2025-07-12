@@ -48,7 +48,7 @@ const AdminLogin = () => {
             to="/"
             className="inline-flex items-center space-x-2 text-white hover:text-gray-200"
           >
-            <Stethoscope className="h-8 w-8" />
+            <img src="/logo.png" alt="Logo" className="h-11 w-15" />
             <span className="text-2xl font-bold">Doctor AI Chat</span>
           </Link>
         </div>

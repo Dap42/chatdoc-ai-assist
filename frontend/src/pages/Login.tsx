@@ -46,10 +46,9 @@ const Login = () => {
         <div className="text-center mb-8">
           <Link
             to="/"
-            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center space-x-2 text-blue-600 hover:text-black-700"
           >
-            <Stethoscope className="h-8 w-8" />
-            <span className="text-2xl font-bold">Doctor AI Chat</span>
+            <img src="/logo.png" alt="Logo" className="h-11 w-15" />
           </Link>
         </div>
 

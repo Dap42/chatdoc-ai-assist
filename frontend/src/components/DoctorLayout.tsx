@@ -97,15 +97,17 @@ const DoctorLayout: React.FC<DoctorLayoutProps> = ({ children }) => {
         <div className="flex items-center justify-between h-16 px-6 border-b">
           {!isSidebarCollapsed && (
             <Link to="/" className="flex items-center space-x-2">
-              <Stethoscope className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">Doctor AI</span>
+              <img src="/logo.png" alt="Logo" className="h-11 w-15" />
+              <span className="text-xl font-bold text-gray-900">
+                Doctor AI Chat
+              </span>
             </Link>
           )}
 
           {isSidebarCollapsed && (
             <div className="flex flex-col items-center">
               <Link to="/" className="flex items-center">
-                <Stethoscope className="h-8 w-8 text-blue-600 mx-auto" />
+                <img src="/logo.png" alt="Logo" className="h-11 w-15 mx-auto" />
               </Link>
               <Button
                 variant="ghost"

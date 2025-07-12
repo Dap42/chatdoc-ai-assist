@@ -97,9 +97,8 @@ const AdminSignup = () => {
             to="/"
             className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700"
           >
-            <Shield className="h-8 w-8" /> {/* Changed icon to Shield */}
+            <img src="/logo.png" alt="Logo" className="h-11 w-15" />
             <span className="text-2xl font-bold">Admin Panel</span>{" "}
-            {/* Changed text */}
           </Link>
         </div>
 

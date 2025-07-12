@@ -11,9 +11,9 @@ import {
   Plus,
   PanelLeft,
   PanelRight,
-  Stethoscope,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "../../../logo.png"; // Import the logo image
 
 import { formatTimestamp } from "@/lib/utils";
 
@@ -85,8 +85,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         <div className="flex items-center justify-between mb-6">
           {!isSidebarCollapsed && (
             <Link to="/" className="flex items-center space-x-2">
-              <Stethoscope className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">Doctor AI</span>
+              <img
+                src={logo}
+                alt="ChatDoc AI Assist Logo"
+                className="h-11 w-15"
+              />
+              <span className="text-xl font-bold text-gray-900">
+                ChatDoc AI
+              </span>
             </Link>
           )}
           <Button
