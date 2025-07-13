@@ -120,10 +120,13 @@ const ChatInterface = () => {
     if (chatId) {
       const storedMessages = localStorage.getItem(`chat-${chatId}-messages`);
       if (storedMessages) {
-        const parsedMessages = JSON.parse(storedMessages).map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-        }));
+        const parsedMessages = JSON.parse(storedMessages).map((msg: any) => {
+          // Ensure timestamp is parsed back into a Date object
+          return {
+            ...msg,
+            timestamp: new Date(msg.timestamp),
+          };
+        });
         setMessages(parsedMessages);
       } else {
         // No stored messages for this chat, so it's a new or empty chat
@@ -178,7 +181,15 @@ const ChatInterface = () => {
   useEffect(() => {
     if (chatId && messages.length > 0) {
       console.log("Saving messages for chat:", chatId, messages);
-      localStorage.setItem(`chat-${chatId}-messages`, JSON.stringify(messages));
+      localStorage.setItem(
+        `chat-${chatId}-messages`,
+        JSON.stringify(
+          messages.map((msg) => ({
+            ...msg,
+            timestamp: msg.timestamp.toISOString(),
+          }))
+        )
+      );
     }
   }, [messages, chatId]);
 
@@ -207,11 +218,16 @@ const ChatInterface = () => {
     setMessages((prevMessages) => {
       const updatedMessages = [...prevMessages, newMessage];
       console.log("Updated messages (doctor):", updatedMessages);
-      // Immediately save the updated messages to localStorage
+      // Immediately save the updated messages to localStorage, converting Date objects to ISO strings
       if (chatId) {
         localStorage.setItem(
           `chat-${chatId}-messages`,
-          JSON.stringify(updatedMessages)
+          JSON.stringify(
+            updatedMessages.map((msg) => ({
+              ...msg,
+              timestamp: msg.timestamp.toISOString(),
+            }))
+          )
         );
       }
       return updatedMessages;

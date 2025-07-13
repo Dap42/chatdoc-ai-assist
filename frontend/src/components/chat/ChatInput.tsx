@@ -45,7 +45,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       />
       <div className="flex items-center pr-3">
         <Button
-          onClick={onSendMessage}
+          onClick={() => onSendMessage()}
           className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl shadow-md"
           size="icon"
           disabled={!message.trim() || isLoading}
