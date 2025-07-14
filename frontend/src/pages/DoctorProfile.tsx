@@ -45,7 +45,7 @@ const DoctorProfile = () => {
       return JSON.parse(savedProfile);
     }
     return {
-      fullName: user?.name || "Dr. John Smith",
+      fullName: user?.name || "Dr. Amit Malik",
       email: user?.email || "doctor@example.com",
       age: "45",
       gender: "male",
@@ -229,7 +229,7 @@ const DoctorProfile = () => {
                             <Input
                               id="fullName"
                               name="fullName"
-                              placeholder="Dr. John Smith"
+                              placeholder="Dr. Amit Malik"
                               value={profile.fullName}
                               onChange={handleChange}
                               className="pl-10"

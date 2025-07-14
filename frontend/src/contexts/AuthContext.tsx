@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Demo credentials validation
       const validCredentials = {
-        doctor: { email: "dr.jhonsmith@gmail.com", password: "password123" },
+        doctor: { email: "dr.amitmalik@gmail.com", password: "Amit@2025" },
         admin: { email: "admin@demo.com", password: "admin123" },
       };
 
@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         id: `${userType}-${Date.now()}`,
         email,
         userType,
-        name: userType === "admin" ? "System Admin" : "Dr. John Smith",
+        name: userType === "admin" ? "System Admin" : "Dr. Amit Malik",
         isApproved: true,
       };
 

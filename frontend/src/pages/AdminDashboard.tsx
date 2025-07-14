@@ -91,8 +91,8 @@ const AdminDashboard = () => {
     const mockDoctors: Doctor[] = [
       {
         id: "1",
-        name: "Dr. John Smith",
-        email: "john.smith@hospital.com",
+        name: "Dr. Amit Malik",
+        email: "dr.amitmalik@gmail.com",
         specialty: "Cardiology",
         registrationDate: new Date(2024, 0, 15),
         status: "pending",
