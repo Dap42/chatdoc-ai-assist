@@ -2,6 +2,8 @@
 
 This project is a full-stack AI assistant application, featuring a React-based frontend and a Python-based backend. It is designed to provide an interactive chat interface,for document-related queries or assistance, leveraging AI capabilities.
 
+hi
+
 ## Project Structure
 
 The project is divided into two main parts:
