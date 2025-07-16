@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment files
+backend/.env
+frontend/.env
+
+#cline rules
+.clinerules
