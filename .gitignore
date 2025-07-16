@@ -29,3 +29,7 @@ frontend/.env
 
 #cline rules
 .clinerules
+
+
+chatdoc_troubleshooting_context.txt
+.gitignore
