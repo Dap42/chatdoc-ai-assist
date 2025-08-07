@@ -11,10 +11,10 @@ import logging # ADDED THIS LINE
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') # ADDED THIS LINE
 
 # Default configuration values
-NUM_CHUNKS = 3  # Number of chunks provided as context
-CORTEX_SEARCH_DATABASE = "CC_QUICKSTART_CORTEX_SEARCH_DOCS"
+NUM_CHUNKS = 5  # Number of chunks provided as context
+CORTEX_SEARCH_DATABASE = "kritik_db"
 CORTEX_SEARCH_SCHEMA = "DATA"
-CORTEX_SEARCH_SERVICE = "CC_SEARCH_SERVICE_CS"
+CORTEX_SEARCH_SERVICE = "KK_SEARCH_SERVICE_CS"
 DEFAULT_MODEL = "llama3.3-70b"
 MIN_SUGGESTED_QUESTIONS = 4  # Minimum number of suggested questions
 CHAT_HISTORY_TABLE = "CHAT_HISTORY"  # Table to store chat history
